@@ -16,14 +16,44 @@ public class TrackSegment : MonoBehaviour
     public Transform collectibleTransform;
 
 
+
     [HideInInspector]
     public float[] obstaclePositions;
+
+    public GameObject spawnedObject;
 
     private void Update()
     {
         if(manager.characterController.transform.position.z >= transform.position.z + manager.trackSegmentDistance)
         {
-            transform.position += new Vector3(0, 0, manager.trackSegmentDistance * manager.trackSegmentCount);
+            NewSpawn();
         }
+    }
+
+    private void Start()
+    {
+        SpawnObjects();
+    }
+
+
+
+    void NewSpawn()
+    {
+       
+
+        transform.position += new Vector3(0, 0, manager.trackSegmentDistance * manager.trackSegmentCount);
+        SpawnObjects();
+
+    }
+
+    void SpawnObjects()
+    {
+        if (spawnedObject != null)
+            Destroy(spawnedObject);
+
+        var randomX = Random.Range(-1, +2) * manager.stepDistance;
+        var newSpawnObjPos = new Vector3(randomX, 0f, transform.position.z);
+
+        spawnedObject = Instantiate(manager.clothes[Random.Range(0, manager.clothes.Length)], newSpawnObjPos, Quaternion.identity, transform);
     }
 }

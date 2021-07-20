@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using GameObject = UnityEngine.GameObject;
+using UnityEngine.UI;
 
 #if UNITY_ANALYTICS
 using UnityEngine.Analytics;
@@ -35,15 +36,20 @@ public class TrackManager : MonoBehaviour
     public float minSpeed = 5.0f;
     public float maxSpeed = 10.0f;
     public int speedStep = 4;
+    public float stepDistance = 3f;
     public float laneOffset = 1.0f;
+    public float currentSpeed = 0.03f;
 
-    
+
+    public float worldDistance { get { return m_TotalWorldDistance; } }
+    public float speedRatio { get { return (currentSpeed - minSpeed) / (maxSpeed - minSpeed); } }
+
 
     public bool invincible = false;
 
-    public float trackSegmentDistance = 10f;
+    public float trackSegmentDistance = 10f;//длина сегмента
 
-    public int trackSegmentCount = 10;
+    public int trackSegmentCount = 10; //start count of segments
 
     public GameObject segmentPrefab;
 
@@ -60,14 +66,32 @@ public class TrackManager : MonoBehaviour
 
     const float k_FloatingOriginThreshold = 10000f;
 
+    protected const float k_Acceleration = 0.2f;
+
 
     protected const float k_SegmentRemovalDistance = -30f;
 
     public Transform cinemachineCamera;
 
+    protected float m_TotalWorldDistance;
+
+    //clothes objects
+    public GameObject[] clothes;
+
+    int clothesScore;
+
+    public Text clothesScoreText;
+
     protected void Awake()
     {
         s_Instance = this;
+
+        
+    }
+    private void Start()
+    {
+        clothesScore = 0;
+        StartMove();
     }
 
 
@@ -80,6 +104,11 @@ public class TrackManager : MonoBehaviour
             StartCoroutine(SpawnNewSegment());
             _spawnedSegments++;
         }
+
+        float scaledSpeed = currentSpeed * Time.deltaTime;
+
+        m_TotalWorldDistance += scaledSpeed;
+
 
         Transform characterTransform = characterController.transform;
         Vector3 currentPos = characterTransform.position;
@@ -107,6 +136,9 @@ public class TrackManager : MonoBehaviour
         }
 
 
+        //ускорение со временем
+        SpeedUp();
+
 
     }
 
@@ -129,6 +161,30 @@ public class TrackManager : MonoBehaviour
     }
 
 
-    
+    public void UpScore(int amount)
+    {
+        clothesScore += amount;
+        UpdateUI();
+    }
+    void UpdateUI()
+    {
+        clothesScoreText.text = clothesScore + "";
+    }
+
+    public void StartMove()
+    {
+        currentSpeed = minSpeed;
+    }
+
+    void SpeedUp()
+    {
+        if (currentSpeed < maxSpeed)
+            currentSpeed += k_Acceleration * Time.deltaTime;
+        else
+            currentSpeed = maxSpeed;
+    }
+
+
+
 
 }

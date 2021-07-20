@@ -6,10 +6,11 @@ using UnityEngine;
 public class PlayerMovement : MonoBehaviour
 {
 	//fields
-	[SerializeField] private float speedPlayer = 3f;
-	[SerializeField] private float stepDistance = 3f;
+	
+	[SerializeField] private float jumpHeight = 2f;
+	[SerializeField] private float jumpLength = 3f;
 
-
+	public TrackManager trackManager;
 	public CharacterCollider characterCollider;
 
 	//components
@@ -29,9 +30,12 @@ public class PlayerMovement : MonoBehaviour
 
 	public float laneChangeSpeed = 1.0f;
 
+	protected const float k_GroundingSpeed = 80f;
 
 	protected const int k_StartingLane = 1;
 	protected Vector3 m_TargetPosition = Vector3.zero;
+
+	public GameObject interactiveCollider;
 
 
 	private void Awake()
@@ -58,6 +62,12 @@ public class PlayerMovement : MonoBehaviour
 		{
 			Jump();
 		}
+		else if (Input.GetKeyDown(KeyCode.Space))
+		{
+			//Debug.Log("Space");
+			TapCloth();
+		}
+
 #else
         // Use touch input on mobile
         if (Input.touchCount == 1)
@@ -115,25 +125,79 @@ public class PlayerMovement : MonoBehaviour
 
 		Vector3 verticalTargetPosition = m_TargetPosition;
 
+		if (m_Jumping)
+		{
+			
+				// Same as with the sliding, we want a fixed jump LENGTH not fixed jump TIME. Also, just as with sliding,
+				// we slightly modify length with speed to make it more playable.
+				float correctJumpLength = jumpLength * (1.0f + trackManager.speedRatio);
+				float ratio = (trackManager.worldDistance - m_JumpStart) / correctJumpLength;
+				if (ratio >= 1.0f)
+				{
+					m_Jumping = false;
+				}
+				else
+				{
+					verticalTargetPosition.y = Mathf.Sin(ratio * Mathf.PI) * jumpHeight;
+				}
+			
+			verticalTargetPosition.y = Mathf.MoveTowards(verticalTargetPosition.y, 0, k_GroundingSpeed * Time.deltaTime);
+
+			if (Mathf.Approximately(verticalTargetPosition.y, 0f))
+			{
+				//m_Jumping = false;
+			}
+			
+		}
+
 		
 		characterCollider.transform.localPosition = Vector3.MoveTowards(characterCollider.transform.localPosition, verticalTargetPosition, laneChangeSpeed * Time.deltaTime);
 
-		transform.Translate(0, 0, speedPlayer);
+		transform.Translate(0, 0, trackManager.currentSpeed * Time.deltaTime);
 
 	}
 
 
 	public void Jump()
 	{
-		if (!m_IsRunning)
-			return;
+		//if (!m_IsRunning)
+		//	return;
 
 		if (!m_Jumping)
 		{
-			Debug.Log("Jump");
+			//Debug.Log("Jump");
+
+			float correctJumpLength = jumpLength * (1.0f + trackManager.speedRatio);
+
+			m_JumpStart = trackManager.worldDistance;
+
+			//character.animator.SetFloat(s_JumpingSpeedHash, animSpeed);
 			m_Jumping = true;
 		}
 	}
+	public void TapCloth()
+    {
+		//Debug.Log("TapCloth");
+		if (interactiveCollider != null)
+        {
+			//Debug.Log("TapCloth");
+			switch (interactiveCollider.GetComponent<ClothInteractive>().Interact(gameObject))
+            {
+				case ClothState.NotReady:
+					break;
+				case ClothState.Ready:
+					interactiveCollider.GetComponentInChildren<MeshRenderer>().material.color = Color.gray;
+					trackManager.UpScore(1);
+					break;
+				case ClothState.BadCondition:
+					interactiveCollider.GetComponentInChildren<MeshRenderer>().material.color = Color.black;
+					trackManager.UpScore(-1);
+					interactiveCollider.GetComponent<Collider>().enabled = false;
+					interactiveCollider = null;
+					break;
+			}
+        }
+    }
 
 
 	public void ChangeLane(int direction)
@@ -148,6 +212,6 @@ public class PlayerMovement : MonoBehaviour
 			return;
 
 		m_CurrentLane = targetLane;
-		m_TargetPosition = new Vector3((m_CurrentLane - 1) * stepDistance, 0, 0);
+		m_TargetPosition = new Vector3((m_CurrentLane - 1) * trackManager.stepDistance, 0, 0);
 	}
 }
