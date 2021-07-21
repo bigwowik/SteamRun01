@@ -39,6 +39,7 @@ public class TrackManager : MonoBehaviour
     public float stepDistance = 3f;
     public float laneOffset = 1.0f;
     public float currentSpeed = 0.03f;
+    public int startLives = 2;
 
 
     public float worldDistance { get { return m_TotalWorldDistance; } }
@@ -81,7 +82,12 @@ public class TrackManager : MonoBehaviour
     int clothesScore;
 
     public Text clothesScoreText;
+    public Text speedText;
+    public Text livesText;
+    public Image damageImg;
+    public GameObject YouDiedText;
 
+    public bool isMoving;
     protected void Awake()
     {
         s_Instance = this;
@@ -91,7 +97,16 @@ public class TrackManager : MonoBehaviour
     private void Start()
     {
         clothesScore = 0;
+
+        livesText.text = startLives + "";
+
+
+        damageImg.gameObject.SetActive(false);
+
+        YouDiedText.SetActive(false);
+
         StartMove();
+
     }
 
 
@@ -137,7 +152,10 @@ public class TrackManager : MonoBehaviour
 
 
         //ускорение со временем
-        SpeedUp();
+        //SpeedUp();
+
+        //обновление скорсти на экране
+        UpdateSpeedUI();
 
 
     }
@@ -163,8 +181,25 @@ public class TrackManager : MonoBehaviour
 
     public void UpScore(int amount)
     {
-        clothesScore += amount;
-        UpdateUI();
+        if (amount > 0)
+        {
+            clothesScore += amount;
+            UpdateUI();
+        }
+        else
+        {
+            
+            startLives--;
+            livesText.text = startLives + "";
+            if(startLives != 0)
+                damageImg.gameObject.SetActive(true);
+            else
+            {
+                StopMoving();
+            }
+
+        }
+        
     }
     void UpdateUI()
     {
@@ -174,6 +209,18 @@ public class TrackManager : MonoBehaviour
     public void StartMove()
     {
         currentSpeed = minSpeed;
+
+        isMoving = true;
+    }
+    public void StopMoving()
+    {
+        //currentSpeed = 0;
+
+        isMoving = false;
+        YouDiedText.SetActive(true);
+        Invoke("Restart", 3f);
+
+
     }
 
     void SpeedUp()
@@ -182,6 +229,16 @@ public class TrackManager : MonoBehaviour
             currentSpeed += k_Acceleration * Time.deltaTime;
         else
             currentSpeed = maxSpeed;
+    }
+
+    void UpdateSpeedUI()
+    {
+        speedText.text = currentSpeed + "";
+    }
+
+    void Restart()
+    {
+        GameManager.Instance.RestartLevel();
     }
 
 

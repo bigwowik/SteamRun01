@@ -67,6 +67,17 @@ public class PlayerMovement : MonoBehaviour
 			//Debug.Log("Space");
 			TapCloth();
 		}
+		else if (Input.GetKeyDown(KeyCode.P))
+		{
+			//Debug.Log("Space");
+			ChangeSpeed(+1);
+		}
+		else if (Input.GetKeyDown(KeyCode.O))
+		{
+			//Debug.Log("Space");
+			ChangeSpeed(-1);
+		}
+		
 
 #else
         // Use touch input on mobile
@@ -150,10 +161,13 @@ public class PlayerMovement : MonoBehaviour
 			
 		}
 
-		
-		characterCollider.transform.localPosition = Vector3.MoveTowards(characterCollider.transform.localPosition, verticalTargetPosition, laneChangeSpeed * Time.deltaTime);
+		if (trackManager.isMoving)
+		{
 
-		transform.Translate(0, 0, trackManager.currentSpeed * Time.deltaTime);
+			characterCollider.transform.localPosition = Vector3.MoveTowards(characterCollider.transform.localPosition, verticalTargetPosition, laneChangeSpeed * Time.deltaTime);
+
+			transform.Translate(0, 0, trackManager.currentSpeed * Time.deltaTime);
+		}
 
 	}
 
@@ -180,22 +194,8 @@ public class PlayerMovement : MonoBehaviour
 		//Debug.Log("TapCloth");
 		if (interactiveCollider != null)
         {
-			//Debug.Log("TapCloth");
-			switch (interactiveCollider.GetComponent<ClothInteractive>().Interact(gameObject))
-            {
-				case ClothState.NotReady:
-					break;
-				case ClothState.Ready:
-					interactiveCollider.GetComponentInChildren<MeshRenderer>().material.color = Color.gray;
-					trackManager.UpScore(1);
-					break;
-				case ClothState.BadCondition:
-					interactiveCollider.GetComponentInChildren<MeshRenderer>().material.color = Color.black;
-					trackManager.UpScore(-1);
-					interactiveCollider.GetComponent<Collider>().enabled = false;
-					interactiveCollider = null;
-					break;
-			}
+			interactiveCollider.GetComponent<ClothInteractive>().currentCount++;
+
         }
     }
 
@@ -214,4 +214,14 @@ public class PlayerMovement : MonoBehaviour
 		m_CurrentLane = targetLane;
 		m_TargetPosition = new Vector3((m_CurrentLane - 1) * trackManager.stepDistance, 0, 0);
 	}
+
+	void ChangeSpeed(int deltaSpeed)
+    {
+		if(trackManager.currentSpeed + deltaSpeed >= 0)
+        {
+			trackManager.currentSpeed += deltaSpeed;
+		}
+		
+    }
+
 }

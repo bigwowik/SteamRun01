@@ -5,20 +5,16 @@ using UnityEngine;
 public class ClothInteractive : MonoBehaviour
 {
     public int tapCountRequired = 0;
+    [HideInInspector]
     public int currentCount = 0;
 
     
-
-    private void OnEnable()
+    public ClothState CheckState(GameObject gameObject)
     {
-        currentCount = 0;
-    }
-    public ClothState Interact(GameObject gameObject)
-    {
-        currentCount++;
+        //currentCount++;
         if (currentCount < tapCountRequired)
         {
-            return ClothState.NotReady;
+            return ClothState.BadCondition;
         }
         else if (currentCount == tapCountRequired)
         {
@@ -26,12 +22,12 @@ public class ClothInteractive : MonoBehaviour
         }
         else
         {
-
             return ClothState.BadCondition;
         }
     }
 
 }
+
 public enum ClothState
 {
     NotReady,
