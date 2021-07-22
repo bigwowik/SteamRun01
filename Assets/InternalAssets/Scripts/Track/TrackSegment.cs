@@ -50,10 +50,29 @@ public class TrackSegment : MonoBehaviour
     {
         if (spawnedObject != null)
             Destroy(spawnedObject);
+        float randomX;
+        if(Random.Range(0,1f) > 0.5f)
+        {
+            randomX = manager.stepDistance/2;
+        }
+        else
+        {
+            randomX = -manager.stepDistance/2;
+        }
+        
+        
 
-        var randomX = Random.Range(-1, +2) * manager.stepDistance;
-        var newSpawnObjPos = new Vector3(randomX, 0f, transform.position.z);
+        if (Utilities.BoolWithChance(manager.upClothPercent)) //верхние
+        {
+            var newSpawnObjPos = new Vector3(manager.stepDistance/2 + randomX, manager.jumpHeight * 0.75f, transform.position.z);
+            spawnedObject = Instantiate(manager.upClothes[Random.Range(0, manager.upClothes.Length)], newSpawnObjPos, Quaternion.identity, transform);
+        }
+        else //  или нижние объекты
+        {
+            var newSpawnObjPos = new Vector3(manager.stepDistance / 2 + randomX, 0f , transform.position.z);
+            spawnedObject = Instantiate(manager.clothes[Random.Range(0, manager.clothes.Length)], newSpawnObjPos, Quaternion.identity, transform);
+        }
 
-        spawnedObject = Instantiate(manager.clothes[Random.Range(0, manager.clothes.Length)], newSpawnObjPos, Quaternion.identity, transform);
+        
     }
 }

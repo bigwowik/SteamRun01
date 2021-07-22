@@ -1,14 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Cinemachine;
 
 
 public class PlayerMovement : MonoBehaviour
 {
 	//fields
-	
-	[SerializeField] private float jumpHeight = 2f;
-	[SerializeField] private float jumpLength = 3f;
 
 	public TrackManager trackManager;
 	public CharacterCollider characterCollider;
@@ -28,15 +26,16 @@ public class PlayerMovement : MonoBehaviour
 	protected int m_CurrentLane = k_StartingLane;
 
 
-	public float laneChangeSpeed = 1.0f;
 
 	protected const float k_GroundingSpeed = 80f;
 
-	protected const int k_StartingLane = 1;
+	protected const int k_StartingLane = 0;
 	protected Vector3 m_TargetPosition = Vector3.zero;
 
 	public GameObject interactiveCollider;
 
+	public GameObject leftCamera;
+	public GameObject rightCamera;
 
 	private void Awake()
     {
@@ -77,7 +76,13 @@ public class PlayerMovement : MonoBehaviour
 			//Debug.Log("Space");
 			ChangeSpeed(-1);
 		}
-		
+		else if (Input.GetKeyDown(KeyCode.Tab))
+		{
+			Debug.Log("GodMode.");
+			trackManager.startLives = 9999;
+			trackManager.livesText.text = trackManager.startLives + "";
+		}
+
 
 #else
         // Use touch input on mobile
@@ -141,7 +146,7 @@ public class PlayerMovement : MonoBehaviour
 			
 				// Same as with the sliding, we want a fixed jump LENGTH not fixed jump TIME. Also, just as with sliding,
 				// we slightly modify length with speed to make it more playable.
-				float correctJumpLength = jumpLength * (1.0f + trackManager.speedRatio);
+				float correctJumpLength = trackManager.jumpLength * (1.0f + trackManager.speedRatio);
 				float ratio = (trackManager.worldDistance - m_JumpStart) / correctJumpLength;
 				if (ratio >= 1.0f)
 				{
@@ -149,7 +154,7 @@ public class PlayerMovement : MonoBehaviour
 				}
 				else
 				{
-					verticalTargetPosition.y = Mathf.Sin(ratio * Mathf.PI) * jumpHeight;
+					verticalTargetPosition.y = Mathf.Sin(ratio * Mathf.PI) * trackManager.jumpHeight;
 				}
 			
 			verticalTargetPosition.y = Mathf.MoveTowards(verticalTargetPosition.y, 0, k_GroundingSpeed * Time.deltaTime);
@@ -164,9 +169,11 @@ public class PlayerMovement : MonoBehaviour
 		if (trackManager.isMoving)
 		{
 
-			characterCollider.transform.localPosition = Vector3.MoveTowards(characterCollider.transform.localPosition, verticalTargetPosition, laneChangeSpeed * Time.deltaTime);
+			characterCollider.transform.localPosition = Vector3.MoveTowards(characterCollider.transform.localPosition, verticalTargetPosition, trackManager.speedStep * Time.deltaTime);
+			
 
-			transform.Translate(0, 0, trackManager.currentSpeed * Time.deltaTime);
+			transform.position += new Vector3(0, 0, trackManager.currentSpeed * Time.deltaTime);
+			//transform.Translate(0, 0, trackManager.currentSpeed * Time.deltaTime);
 		}
 
 	}
@@ -181,7 +188,7 @@ public class PlayerMovement : MonoBehaviour
 		{
 			//Debug.Log("Jump");
 
-			float correctJumpLength = jumpLength * (1.0f + trackManager.speedRatio);
+			float correctJumpLength = trackManager.jumpLength * (1.0f + trackManager.speedRatio);
 
 			m_JumpStart = trackManager.worldDistance;
 
@@ -195,8 +202,9 @@ public class PlayerMovement : MonoBehaviour
 		if (interactiveCollider != null)
         {
 			interactiveCollider.GetComponent<ClothInteractive>().currentCount++;
+			SetCameraInpulse();
 
-        }
+		}
     }
 
 
@@ -207,12 +215,13 @@ public class PlayerMovement : MonoBehaviour
 
 		int targetLane = m_CurrentLane + direction;
 
-		if (targetLane < 0 || targetLane > 2)
+		if (targetLane < 0 || targetLane > 1)
 			// Ignore, we are on the borders.
 			return;
 
 		m_CurrentLane = targetLane;
-		m_TargetPosition = new Vector3((m_CurrentLane - 1) * trackManager.stepDistance, 0, 0);
+		m_TargetPosition = new Vector3((m_CurrentLane) * trackManager.stepDistance, 0, 0);
+		SetCamera(m_CurrentLane);
 	}
 
 	void ChangeSpeed(int deltaSpeed)
@@ -223,5 +232,27 @@ public class PlayerMovement : MonoBehaviour
 		}
 		
     }
+
+	void SetCamera(int line)
+    {
+		if(line == 0)
+        {
+			leftCamera.SetActive(true);
+			rightCamera.SetActive(false);
+        }
+        else
+        {
+
+			rightCamera.SetActive(true);
+			leftCamera.SetActive(false);
+
+		}
+    }
+
+	void SetCameraInpulse()
+    {
+		var source = GetComponent<CinemachineImpulseSource>();
+		source.GenerateImpulse();
+	}
 
 }

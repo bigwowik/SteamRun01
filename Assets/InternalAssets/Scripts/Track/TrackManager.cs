@@ -35,12 +35,15 @@ public class TrackManager : MonoBehaviour
     public PlayerMovement characterController;
     public float minSpeed = 5.0f;
     public float maxSpeed = 10.0f;
-    public int speedStep = 4;
+    public float speedStep = 4;
     public float stepDistance = 3f;
     public float laneOffset = 1.0f;
     public float currentSpeed = 0.03f;
     public int startLives = 2;
 
+    public float jumpHeight = 3f;
+    public float jumpLength = 3f;
+    public float jumpSpeed = 3f;
 
     public float worldDistance { get { return m_TotalWorldDistance; } }
     public float speedRatio { get { return (currentSpeed - minSpeed) / (maxSpeed - minSpeed); } }
@@ -74,10 +77,14 @@ public class TrackManager : MonoBehaviour
 
     public Transform cinemachineCamera;
 
+    public int upClothPercent = 35;
+
     protected float m_TotalWorldDistance;
 
     //clothes objects
     public GameObject[] clothes;
+    //up objects
+    public GameObject[] upClothes;
 
     int clothesScore;
 
@@ -107,6 +114,8 @@ public class TrackManager : MonoBehaviour
 
         StartMove();
 
+        
+
     }
 
 
@@ -114,11 +123,7 @@ public class TrackManager : MonoBehaviour
     private int _spawnedSegments = 0;
     void Update()
     {
-        while (_spawnedSegments < trackSegmentCount)
-        {
-            StartCoroutine(SpawnNewSegment());
-            _spawnedSegments++;
-        }
+        
 
         float scaledSpeed = currentSpeed * Time.deltaTime;
 
@@ -147,7 +152,9 @@ public class TrackManager : MonoBehaviour
                 trackSegment.transform.position -= currentPos;
             }
             characterController.transform.position -= currentPos;
+            cinemachineCamera.gameObject.SetActive(false);
             cinemachineCamera.position -= currentPos;
+            cinemachineCamera.gameObject.SetActive(true);
         }
 
 
@@ -165,14 +172,17 @@ public class TrackManager : MonoBehaviour
     private readonly Vector3 _offScreenSpawnPos = new Vector3(-100f, -100f, -100f);
     public IEnumerator SpawnNewSegment()
     {
-        Vector3 newPos = new Vector3(0, -1f, _spawnedSegments * trackSegmentDistance);
-        GameObject newSegmentGameObject = Instantiate(segmentPrefab, newPos, Quaternion.identity);
+        while (_spawnedSegments < trackSegmentCount)
+        {
+            Vector3 newPos = new Vector3(stepDistance/2, -1f, _spawnedSegments * trackSegmentDistance);
+            GameObject newSegmentGameObject = Instantiate(segmentPrefab, newPos, Quaternion.identity);
 
-        TrackSegment newSegment = newSegmentGameObject.GetComponent<TrackSegment>();
-        newSegment.manager = this;
-        m_Segments.Add(newSegment);
-
-
+            TrackSegment newSegment = newSegmentGameObject.GetComponent<TrackSegment>();
+            newSegment.manager = this;
+            m_Segments.Add(newSegment);
+            yield return new WaitForSeconds(0.01f);
+            _spawnedSegments++;
+        }
 
         yield return null;
 
@@ -211,6 +221,9 @@ public class TrackManager : MonoBehaviour
         currentSpeed = minSpeed;
 
         isMoving = true;
+
+
+        StartCoroutine(SpawnNewSegment());
     }
     public void StopMoving()
     {
