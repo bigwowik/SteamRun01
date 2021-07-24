@@ -111,9 +111,9 @@ GameObject:
   - component: {fileID: 6984371147720975524}
   - component: {fileID: 509417067047822224}
   - component: {fileID: 1209789828363067273}
-  - component: {fileID: 7308967468976890030}
   - component: {fileID: -656408145352823875}
   - component: {fileID: 1560691901828236906}
+  - component: {fileID: 6001250893295473879}
   m_Layer: 6
   m_Name: Cloth1
   m_TagString: Untagged
@@ -185,19 +185,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!135 &7308967468976890030
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7473409520963833595}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.5
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &-656408145352823875
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -228,6 +215,19 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!65 &6001250893295473879
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7473409520963833595}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1, y: 1, z: 1.9793092}
+  m_Center: {x: 0, y: 0, z: 0.2868684}
 --- !u!1 &7530008629908152440
 GameObject:
   m_ObjectHideFlags: 0

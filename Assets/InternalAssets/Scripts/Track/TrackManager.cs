@@ -33,27 +33,47 @@ public class TrackManager : MonoBehaviour
 
     [Header("Character & Movements")]
     public PlayerMovement characterController;
+    [Header("Скорость")]
     public float minSpeed = 5.0f;
     public float maxSpeed = 10.0f;
-    public float speedStep = 4;
-    public float stepDistance = 3f;
-    public float laneOffset = 1.0f;
     public float currentSpeed = 0.03f;
-    public int startLives = 2;
-
+    [Header("Передвижение")]
+    public float horizontalMovingSpeed = 4;
+    public float horizontalStepDistance = 3f;
+    [Header("Прыжок")]
     public float jumpHeight = 3f;
     public float jumpLength = 3f;
     public float jumpSpeed = 3f;
 
+    
+
+    [Header("Спавн")]
+    public float startSpawnObjectDistance = 20f;
+
+    public int upClothPercent = 35;
+    public int emptyClothPercent = 20;
+
+
+    public float trackSegmentDistance = 10f;//длина сегмента
+    public int trackSegmentCount = 10; //start count of segments
+
+    //clothes objects
+    public GameObject[] clothes;
+    //up objects
+    public GameObject[] upClothes;
+
+    protected const float k_SegmentRemovalDistance = -30f; // когда удаляются платформы
+
+    [Header("Счет и жизни")]
+    public int startLives = 2;
     public float worldDistance { get { return m_TotalWorldDistance; } }
     public float speedRatio { get { return (currentSpeed - minSpeed) / (maxSpeed - minSpeed); } }
 
 
+    
+
     public bool invincible = false;
 
-    public float trackSegmentDistance = 10f;//длина сегмента
-
-    public int trackSegmentCount = 10; //start count of segments
 
     public GameObject segmentPrefab;
 
@@ -73,18 +93,12 @@ public class TrackManager : MonoBehaviour
     protected const float k_Acceleration = 0.2f;
 
 
-    protected const float k_SegmentRemovalDistance = -30f;
 
     public Transform cinemachineCamera;
 
-    public int upClothPercent = 35;
 
     protected float m_TotalWorldDistance;
 
-    //clothes objects
-    public GameObject[] clothes;
-    //up objects
-    public GameObject[] upClothes;
 
     int clothesScore;
 
@@ -174,11 +188,11 @@ public class TrackManager : MonoBehaviour
     {
         while (_spawnedSegments < trackSegmentCount)
         {
-            Vector3 newPos = new Vector3(stepDistance/2, -1f, _spawnedSegments * trackSegmentDistance);
+            Vector3 newPos = new Vector3(horizontalStepDistance/2, -1f, _spawnedSegments * trackSegmentDistance);
             GameObject newSegmentGameObject = Instantiate(segmentPrefab, newPos, Quaternion.identity);
 
             TrackSegment newSegment = newSegmentGameObject.GetComponent<TrackSegment>();
-            newSegment.manager = this;
+            newSegment.trackManager = this;
             m_Segments.Add(newSegment);
             yield return new WaitForSeconds(0.01f);
             _spawnedSegments++;

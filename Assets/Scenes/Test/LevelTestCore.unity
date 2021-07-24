@@ -1421,28 +1421,29 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   characterController: {fileID: 1458512030}
-  minSpeed: 3
-  maxSpeed: 10
-  speedStep: 12.5
-  stepDistance: 5
-  laneOffset: 1
-  currentSpeed: 0.03
-  startLives: 2
+  minSpeed: 10
+  maxSpeed: 30
+  currentSpeed: 30
+  horizontalMovingSpeed: 30
+  horizontalStepDistance: 5
   jumpHeight: 3
   jumpLength: 3
   jumpSpeed: 3
-  invincible: 0
+  startSpawnObjectDistance: 20
+  upClothPercent: 30
+  emptyClothPercent: 20
   trackSegmentDistance: 10
   trackSegmentCount: 10
-  segmentPrefab: {fileID: 4377810644322922920, guid: af4caf89910d0c343969e6540e8937a3, type: 3}
-  cinemachineCamera: {fileID: 1892485812}
-  upClothPercent: 30
   clothes:
   - {fileID: 7473409520963833595, guid: 0b5748aea410ae54c8c850e5e903b56c, type: 3}
   - {fileID: 7473409520963833595, guid: 37eea4ba111af524ead1e092c4d10859, type: 3}
   - {fileID: 7473409520963833595, guid: 07830917e9f290d40b3c4c805b1dc35c, type: 3}
   upClothes:
   - {fileID: 7473409520963833595, guid: 0b5748aea410ae54c8c850e5e903b56c, type: 3}
+  startLives: 2
+  invincible: 0
+  segmentPrefab: {fileID: 4377810644322922920, guid: af4caf89910d0c343969e6540e8937a3, type: 3}
+  cinemachineCamera: {fileID: 1892485812}
   clothesScoreText: {fileID: 1202409005}
   speedText: {fileID: 264678658}
   livesText: {fileID: 245376964}

@@ -169,7 +169,7 @@ public class PlayerMovement : MonoBehaviour
 		if (trackManager.isMoving)
 		{
 
-			characterCollider.transform.localPosition = Vector3.MoveTowards(characterCollider.transform.localPosition, verticalTargetPosition, trackManager.speedStep * Time.deltaTime);
+			characterCollider.transform.localPosition = Vector3.MoveTowards(characterCollider.transform.localPosition, verticalTargetPosition, trackManager.horizontalMovingSpeed * Time.deltaTime);
 			
 
 			transform.position += new Vector3(0, 0, trackManager.currentSpeed * Time.deltaTime);
@@ -220,7 +220,7 @@ public class PlayerMovement : MonoBehaviour
 			return;
 
 		m_CurrentLane = targetLane;
-		m_TargetPosition = new Vector3((m_CurrentLane) * trackManager.stepDistance, 0, 0);
+		m_TargetPosition = new Vector3((m_CurrentLane) * trackManager.horizontalStepDistance, 0, 0);
 		SetCamera(m_CurrentLane);
 	}
 

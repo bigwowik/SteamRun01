@@ -10,7 +10,7 @@ using UnityEditor;
 public class TrackSegment : MonoBehaviour
 {
     public Transform pathParent;
-    public TrackManager manager;
+    public TrackManager trackManager;
 
     public Transform objectRoot;
     public Transform collectibleTransform;
@@ -24,7 +24,7 @@ public class TrackSegment : MonoBehaviour
 
     private void Update()
     {
-        if(manager.characterController.transform.position.z >= transform.position.z + manager.trackSegmentDistance)
+        if(trackManager.characterController.transform.position.z >= transform.position.z + trackManager.trackSegmentDistance)
         {
             NewSpawn();
         }
@@ -41,36 +41,48 @@ public class TrackSegment : MonoBehaviour
     {
        
 
-        transform.position += new Vector3(0, 0, manager.trackSegmentDistance * manager.trackSegmentCount);
-        SpawnObjects();
+        transform.position += new Vector3(0, 0, trackManager.trackSegmentDistance * trackManager.trackSegmentCount);
+        
+            SpawnObjects();
 
     }
 
     void SpawnObjects()
     {
-        if (spawnedObject != null)
-            Destroy(spawnedObject);
-        float randomX;
-        if(Random.Range(0,1f) > 0.5f)
+        if (Vector3.Distance(transform.position, trackManager.characterController.transform.position) > trackManager.startSpawnObjectDistance)
         {
-            randomX = manager.stepDistance/2;
-        }
-        else
-        {
-            randomX = -manager.stepDistance/2;
-        }
-        
-        
+            if (spawnedObject != null)
+                Destroy(spawnedObject);
+            float randomX;
+            if (Random.Range(0, 1f) > 0.5f)
+            {
+                randomX = trackManager.horizontalStepDistance / 2;
+            }
+            else
+            {
+                randomX = -trackManager.horizontalStepDistance / 2;
+            }
 
-        if (Utilities.BoolWithChance(manager.upClothPercent)) //верхние
-        {
-            var newSpawnObjPos = new Vector3(manager.stepDistance/2 + randomX, manager.jumpHeight * 0.75f, transform.position.z);
-            spawnedObject = Instantiate(manager.upClothes[Random.Range(0, manager.upClothes.Length)], newSpawnObjPos, Quaternion.identity, transform);
-        }
-        else //  или нижние объекты
-        {
-            var newSpawnObjPos = new Vector3(manager.stepDistance / 2 + randomX, 0f , transform.position.z);
-            spawnedObject = Instantiate(manager.clothes[Random.Range(0, manager.clothes.Length)], newSpawnObjPos, Quaternion.identity, transform);
+
+            var rnd = Random.Range(0, 100f);
+
+
+            if (rnd <= trackManager.emptyClothPercent) //пустые
+            {
+                //пустые объекты
+                Debug.Log("Empty cloth.");
+            }
+
+            if (rnd <= trackManager.upClothPercent) //верхние
+            { 
+                var newSpawnObjPos = new Vector3(trackManager.horizontalStepDistance / 2 + randomX, trackManager.jumpHeight * 0.75f, transform.position.z);
+                spawnedObject = Instantiate(trackManager.upClothes[Random.Range(0, trackManager.upClothes.Length)], newSpawnObjPos, Quaternion.identity, transform);
+            }
+            else //  или нижние объекты
+            {
+                var newSpawnObjPos = new Vector3(trackManager.horizontalStepDistance / 2 + randomX, 0f, transform.position.z);
+                spawnedObject = Instantiate(trackManager.clothes[Random.Range(0, trackManager.clothes.Length)], newSpawnObjPos, Quaternion.identity, transform);
+            }
         }
 
         
