@@ -37,6 +37,8 @@ public class PlayerMovement : MonoBehaviour
 	public GameObject leftCamera;
 	public GameObject rightCamera;
 
+	float lastClickTime;
+
 	private void Awake()
     {
     }
@@ -198,14 +200,54 @@ public class PlayerMovement : MonoBehaviour
 	}
 	public void TapCloth()
     {
-		//Debug.Log("TapCloth");
+		float timeSinceLastClick = Time.time - lastClickTime;
+
 		if (interactiveCollider != null)
-        {
-			interactiveCollider.GetComponent<ClothInteractive>().currentCount++;
+		{
+			//Debug.Log("TapCloth");
+			
+
+			if (timeSinceLastClick <= TrackManager.Instance.timeToDoubleTap)
+			{
+				interactiveCollider.GetComponent<ClothInteractive>().DoubleTap();
+				characterCollider.CheckClothes(interactiveCollider.GetComponent<ClothInteractive>());
+				StopCoroutine(checkClothReset);
+				//double tap
+				Debug.Log("Double Tap");
+			}
+			else
+			{
+				interactiveCollider.GetComponent<ClothInteractive>().SingleTap();
+
+
+				checkClothReset = CheckCurrentClothes();
+				StartCoroutine(checkClothReset);
+				//single tap
+				Debug.Log("Single Tap");
+				
+			}
 			SetCameraInpulse();
 
+
+
 		}
-    }
+
+		lastClickTime = Time.time;
+
+	}
+	IEnumerator checkClothReset;
+	IEnumerator CheckCurrentClothes()
+	{
+		yield return new WaitForSeconds(TrackManager.Instance.timeToDoubleTap);
+		Debug.Log("Single Tap Reset");
+		if (interactiveCollider != null)
+		{
+			characterCollider.CheckClothes(interactiveCollider.GetComponent<ClothInteractive>());
+		}
+		yield return null;
+
+
+	}
 
 
 	public void ChangeLane(int direction)

@@ -25,7 +25,7 @@ using UnityEngine.Analytics;
 /// 
 /// - End is called and everything is cleared and destroyed, and we go back to the Loadout State.
 /// </summary>
-public class TrackManager : MonoBehaviour
+public class TrackManager : Singleton<TrackManager>
 {
     static public TrackManager instance { get { return s_Instance; } }
     static protected TrackManager s_Instance;
@@ -56,6 +56,8 @@ public class TrackManager : MonoBehaviour
 
     public float trackSegmentDistance = 10f;//длина сегмента
     public int trackSegmentCount = 10; //start count of segments
+    public float trackSegmentTeleportDistance = 20f;//расстояние для телепорта
+
 
     //clothes objects
     public GameObject[] clothes;
@@ -109,12 +111,9 @@ public class TrackManager : MonoBehaviour
     public GameObject YouDiedText;
 
     public bool isMoving;
-    protected void Awake()
-    {
-        s_Instance = this;
 
-        
-    }
+    public float timeToDoubleTap = 0.5f;
+    
     private void Start()
     {
         clothesScore = 0;
@@ -173,7 +172,7 @@ public class TrackManager : MonoBehaviour
 
 
         //ускорение со временем
-        //SpeedUp();
+        SpeedUp();
 
         //обновление скорсти на экране
         UpdateSpeedUI();
@@ -194,7 +193,7 @@ public class TrackManager : MonoBehaviour
             TrackSegment newSegment = newSegmentGameObject.GetComponent<TrackSegment>();
             newSegment.trackManager = this;
             m_Segments.Add(newSegment);
-            yield return new WaitForSeconds(0.01f);
+            yield return new WaitForSeconds(0.001f);
             _spawnedSegments++;
         }
 

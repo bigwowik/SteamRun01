@@ -25,7 +25,7 @@ public class CharacterCollider : MonoBehaviour
         }
     }
 
-    void CheckClothes(ClothInteractive clothObj)
+    public void CheckClothes(ClothInteractive clothObj)
     {
 
         //Debug.Log("TapCloth");
@@ -34,11 +34,14 @@ public class CharacterCollider : MonoBehaviour
             case ClothState.NotReady:
                 break;
             case ClothState.Ready:
-                clothObj.GetComponentInChildren<MeshRenderer>().material.color = Color.gray;
+
+                clothObj.GetComponentInChildren<MeshRenderer>().material.color = Color.white;
+                clothObj.GetComponentInChildren<MeshRenderer>().material.mainTexture = null;
                 playerMovement.trackManager.UpScore(1);
                 break;
             case ClothState.BadCondition:
                 clothObj.GetComponentInChildren<MeshRenderer>().material.color = Color.black;
+                clothObj.GetComponentInChildren<MeshRenderer>().material.mainTexture = null;
                 playerMovement.trackManager.UpScore(-1);
                 clothObj.GetComponent<Collider>().enabled = false;
                 break;

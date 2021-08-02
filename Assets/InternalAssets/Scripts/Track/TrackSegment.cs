@@ -24,7 +24,7 @@ public class TrackSegment : MonoBehaviour
 
     private void Update()
     {
-        if(trackManager.characterController.transform.position.z >= transform.position.z + trackManager.trackSegmentDistance)
+        if(trackManager.characterController.transform.position.z >= transform.position.z + trackManager.trackSegmentTeleportDistance)
         {
             NewSpawn();
         }
@@ -80,7 +80,7 @@ public class TrackSegment : MonoBehaviour
             }
             else //  или нижние объекты
             {
-                var newSpawnObjPos = new Vector3(trackManager.horizontalStepDistance / 2 + randomX, 0f, transform.position.z);
+                var newSpawnObjPos = new Vector3(trackManager.horizontalStepDistance / 2 + randomX, -0.6f, transform.position.z);
                 spawnedObject = Instantiate(trackManager.clothes[Random.Range(0, trackManager.clothes.Length)], newSpawnObjPos, Quaternion.identity, transform);
             }
         }
