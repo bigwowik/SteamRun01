@@ -49,6 +49,13 @@ public class PlayerMovement : MonoBehaviour
     // Update is called once per frame
     
 
+	public void GodModeButton()
+    {
+		Debug.Log("GodMode.");
+		trackManager.startLives = 9999;
+		trackManager.livesText.text = trackManager.startLives + "";
+	}
+
 	protected void Update()
 	{
 //#if UNITY_EDITOR || UNITY_STANDALONE
@@ -127,6 +134,10 @@ public class PlayerMovement : MonoBehaviour
 					}
 						
 					m_IsSwiping = false;
+                }
+                else
+                {
+					
 				}
             }
 
@@ -136,11 +147,12 @@ public class PlayerMovement : MonoBehaviour
 			{
 				m_StartingTouch = Input.GetTouch(0).position;
 				m_IsSwiping = true;
-				TapCloth();
+				
 			}
 			else if(Input.GetTouch(0).phase == TouchPhase.Ended)
 			{
 				m_IsSwiping = false;
+				TapCloth();
 			}
         }
 //#endif
@@ -205,7 +217,7 @@ public class PlayerMovement : MonoBehaviour
 	public void TapCloth()
     {
 		float timeSinceLastClick = Time.time - lastClickTime;
-
+		Debug.Log("timeSinceLastClick : " + timeSinceLastClick);
 		if (interactiveCollider != null)
 		{
 			//Debug.Log("TapCloth");
@@ -215,6 +227,8 @@ public class PlayerMovement : MonoBehaviour
 			{
 				interactiveCollider.GetComponent<ClothInteractive>().DoubleTap();
 				characterCollider.CheckClothes(interactiveCollider.GetComponent<ClothInteractive>());
+				interactiveCollider = null;
+
 				StopCoroutine(checkClothReset);
 				//double tap
 				Debug.Log("Double Tap");
@@ -247,6 +261,7 @@ public class PlayerMovement : MonoBehaviour
 		if (interactiveCollider != null)
 		{
 			characterCollider.CheckClothes(interactiveCollider.GetComponent<ClothInteractive>());
+			interactiveCollider = null;
 		}
 		yield return null;
 
