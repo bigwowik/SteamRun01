@@ -40,6 +40,7 @@ public class TrackManager : Singleton<TrackManager>
     [Header("Передвижение")]
     public float horizontalMovingSpeed = 4;
     public float horizontalStepDistance = 3f;
+    public float horizontalSpeedRatio = 1.5f;
     [Header("Прыжок")]
     public float jumpHeight = 3f;
     public float jumpLength = 3f;
@@ -193,7 +194,7 @@ public class TrackManager : Singleton<TrackManager>
             TrackSegment newSegment = newSegmentGameObject.GetComponent<TrackSegment>();
             newSegment.trackManager = this;
             m_Segments.Add(newSegment);
-            yield return new WaitForSeconds(0.001f);
+            yield return new WaitForSeconds(0.0001f);
             _spawnedSegments++;
         }
 

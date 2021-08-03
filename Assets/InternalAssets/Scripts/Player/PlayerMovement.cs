@@ -26,6 +26,10 @@ public class PlayerMovement : MonoBehaviour
 	protected int m_CurrentLane = k_StartingLane;
 
 
+	protected bool m_IsSwiping;
+	protected Vector2 m_StartingTouch;
+
+
 
 	protected const float k_GroundingSpeed = 80f;
 
@@ -47,7 +51,7 @@ public class PlayerMovement : MonoBehaviour
 
 	protected void Update()
 	{
-#if UNITY_EDITOR || UNITY_STANDALONE
+//#if UNITY_EDITOR || UNITY_STANDALONE
 		// Use key input in editor or standalone
 		// disabled if it's tutorial and not thecurrent right tutorial level (see func TutorialMoveCheck)
 
@@ -85,10 +89,9 @@ public class PlayerMovement : MonoBehaviour
 			trackManager.livesText.text = trackManager.startLives + "";
 		}
 
-
-#else
-        // Use touch input on mobile
-        if (Input.touchCount == 1)
+//#else
+// Use touch input on mobile
+		if (Input.touchCount == 1)
         {
 			if(m_IsSwiping)
 			{
@@ -102,16 +105,16 @@ public class PlayerMovement : MonoBehaviour
 				{
 					if(Mathf.Abs(diff.y) > Mathf.Abs(diff.x))
 					{
-						if(TutorialMoveCheck(2) && diff.y < 0)
+						if(diff.y < 0)
 						{
 							//Slide();
 						}
-						else if(TutorialMoveCheck(1))
+						else
 						{
 							Jump();
 						}
 					}
-					else if(TutorialMoveCheck(0))
+					else
 					{
 						if(diff.x < 0)
 						{
@@ -133,13 +136,14 @@ public class PlayerMovement : MonoBehaviour
 			{
 				m_StartingTouch = Input.GetTouch(0).position;
 				m_IsSwiping = true;
+				TapCloth();
 			}
 			else if(Input.GetTouch(0).phase == TouchPhase.Ended)
 			{
 				m_IsSwiping = false;
 			}
         }
-#endif
+//#endif
 
 		Vector3 verticalTargetPosition = m_TargetPosition;
 
@@ -171,7 +175,7 @@ public class PlayerMovement : MonoBehaviour
 		if (trackManager.isMoving)
 		{
 
-			characterCollider.transform.localPosition = Vector3.MoveTowards(characterCollider.transform.localPosition, verticalTargetPosition, trackManager.horizontalMovingSpeed * Time.deltaTime);
+			characterCollider.transform.localPosition = Vector3.MoveTowards(characterCollider.transform.localPosition, verticalTargetPosition, trackManager.currentSpeed * trackManager.horizontalSpeedRatio * Time.deltaTime);
 			
 
 			transform.position += new Vector3(0, 0, trackManager.currentSpeed * Time.deltaTime);
