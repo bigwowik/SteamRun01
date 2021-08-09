@@ -12,6 +12,9 @@ public class CharacterCollider : MonoBehaviour
             playerMovement.interactiveCollider = c.gameObject;
             //Debug.Log("Cloth was trigger entered.");
             
+        }else if(c.gameObject.GetComponent<IInteractive>() != null)
+        {
+            c.gameObject.GetComponent<IInteractive>().OnInteract();
         }
     }
     protected void OnTriggerExit(Collider c)

@@ -43,6 +43,12 @@ public class PlayerMovement : MonoBehaviour
 
 	float lastClickTime;
 
+
+	public GameObject shield;
+
+	public Transform steamPoint;
+
+	public GameObject steamFlow;
 	
 
 	private void Awake()
@@ -56,15 +62,15 @@ public class PlayerMovement : MonoBehaviour
 		if (!trackManager.godMode)
 		{
 			Debug.Log("GodMode on.");
-			trackManager.startLives = 9999;
-			trackManager.livesText.text = trackManager.startLives + "";
+			trackManager.currentLives = 9999;
+			trackManager.livesText.text = trackManager.currentLives + "";
 			trackManager.godMode = true;
         }
         else
         {
 			Debug.Log("GodMode off.");
-			trackManager.startLives = 2;
-			trackManager.livesText.text = trackManager.startLives + "";
+			trackManager.currentLives = 2;
+			trackManager.livesText.text = trackManager.currentLives + "";
 			trackManager.godMode = false;
 		}
 	}
@@ -208,6 +214,16 @@ public class PlayerMovement : MonoBehaviour
 			//transform.Translate(0, 0, trackManager.currentSpeed * Time.deltaTime);
 		}
 
+        if (trackManager.isProtected)
+        {
+			shield.SetActive(true);
+
+        }
+        else
+        {
+			shield.SetActive(false);
+		}
+
 	}
 
 
@@ -246,6 +262,9 @@ public class PlayerMovement : MonoBehaviour
 				StopCoroutine(checkClothReset);
 				//double tap
 				Debug.Log("Double Tap");
+				var particles1 = Instantiate(steamFlow, steamPoint);
+				var particles2 = Instantiate(steamFlow, steamPoint); Instantiate(steamFlow, steamPoint);
+				
 			}
 			else
 			{
@@ -256,7 +275,8 @@ public class PlayerMovement : MonoBehaviour
 				StartCoroutine(checkClothReset);
 				//single tap
 				Debug.Log("Single Tap");
-				
+				Instantiate(steamFlow, steamPoint);
+
 			}
 			SetCameraInpulse();
 

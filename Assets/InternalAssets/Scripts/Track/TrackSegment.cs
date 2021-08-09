@@ -88,7 +88,7 @@ public class TrackSegment : MonoBehaviour
             if (rnd <= trackManager.emptyClothPercent) //пустые
             {
                 //пустые объекты
-                Debug.Log("Empty cloth.");
+                //Debug.Log("Empty cloth.");
             }
 
             if (rnd <= trackManager.upClothPercent) //верхние

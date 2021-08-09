@@ -17,6 +17,7 @@ public class LevelsCollection : ScriptableObject
 
     public void UpdateLevels()
     {
+        levelDataDict.Clear();
         for (int i = 0; i < levels.Length; i++)
         {
             var levelName = "Level " + i;

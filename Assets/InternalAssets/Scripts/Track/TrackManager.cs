@@ -68,6 +68,7 @@ public class TrackManager : Singleton<TrackManager>
     protected const float k_SegmentRemovalDistance = -30f; // когда удаляются платформы
 
     [Header("Счет и жизни")]
+    public int currentLives = 2;
     public int startLives = 2;
     public float worldDistance { get { return m_TotalWorldDistance; } }
     public float speedRatio { get { return (currentSpeed - minSpeed) / (maxSpeed - minSpeed); } }
@@ -126,6 +127,11 @@ public class TrackManager : Singleton<TrackManager>
     public bool godMode;
 
 
+    IEnumerator shieldEnumerator;
+    public bool isProtected { get; private set; }
+
+    public Image shieldTimerImage;
+
     #region Start
     private void Start()
     {
@@ -141,7 +147,7 @@ public class TrackManager : Singleton<TrackManager>
         {
             LastSpawnedSegmentCount = 0;
             clothesScore = 0;
-            livesText.text = startLives + "";
+            livesText.text = currentLives + "";
             damageImg.gameObject.SetActive(false);
             YouDiedText.SetActive(false);
             isMoving = true;
@@ -232,19 +238,65 @@ public class TrackManager : Singleton<TrackManager>
         }
         else
         {
-
-            startLives--;
-            livesText.text = startLives + "";
-            if (startLives != 0)
-                damageImg.gameObject.SetActive(true);
-            else
-            {
-                StopMoving();
-            }
-
+            Damage();
         }
 
     }
+
+    public void Damage()
+    {
+        if (isProtected)
+            return;
+
+        currentLives--;
+        livesText.text = currentLives + "";
+        if (currentLives != 0)
+            damageImg.gameObject.SetActive(true);
+        else
+        {
+            StopMoving();
+        }
+    }
+
+    
+
+    public void Healing()
+    {
+        //if (currentLives + 1 >= startLives)
+            currentLives = startLives;
+        //else
+        //    currentLives++;
+        livesText.text = currentLives + "";
+        damageImg.gameObject.SetActive(false);
+        
+    }
+
+    public void SetShield(float shieldTime)
+    {
+        shieldEnumerator = ShieldStart(shieldTime);
+        StartCoroutine(shieldEnumerator);
+    }
+
+    IEnumerator ShieldStart(float shieldTime)
+    {
+        isProtected = true;
+        float timer = 0;
+        shieldTimerImage.gameObject.SetActive(true);
+        while (timer < shieldTime)
+        {
+            timer += Time.deltaTime;
+
+            shieldTimerImage.fillAmount = (shieldTime - timer) / shieldTime;
+            yield return null;
+        }
+
+        shieldTimerImage.gameObject.SetActive(false);
+        //yield return new WaitForSeconds(shieldTime);
+        isProtected = false;
+        yield return null;
+    }
+
+
     void UpdateUI()
     {
         clothesScoreText.text = clothesScore + "";
