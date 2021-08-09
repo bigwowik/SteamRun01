@@ -46,7 +46,7 @@ public class TrackManager : Singleton<TrackManager>
     public float jumpLength = 3f;
     public float jumpSpeed = 3f;
 
-    
+
 
     [Header("Спавн")]
     public float startSpawnObjectDistance = 20f;
@@ -73,7 +73,7 @@ public class TrackManager : Singleton<TrackManager>
     public float speedRatio { get { return (currentSpeed - minSpeed) / (maxSpeed - minSpeed); } }
 
 
-    
+
 
     public bool invincible = false;
 
@@ -101,6 +101,8 @@ public class TrackManager : Singleton<TrackManager>
 
 
     protected float m_TotalWorldDistance;
+    protected int lastSegmentCount;
+
 
 
     int clothesScore;
@@ -111,33 +113,51 @@ public class TrackManager : Singleton<TrackManager>
     public Image damageImg;
     public GameObject YouDiedText;
 
-    public bool isMoving;
+    public bool isMoving = false;
 
     public float timeToDoubleTap = 0.5f;
-    
+
+    public int currentLevel = 0;
+
+    public LevelsCollection levelsCollection;
+
+
+    [HideInInspector]
+    public bool godMode;
+
+
+    #region Start
     private void Start()
     {
-        clothesScore = 0;
+        GameManager.Instance.OnGameStateChanged.AddListener(OnStartRun);
 
-        livesText.text = startLives + "";
+        OnStartRun(GameManager.Instance.CurrentGameState, GameManager.GameState.PREGAME); // not super correct
 
-
-        damageImg.gameObject.SetActive(false);
-
-        YouDiedText.SetActive(false);
-
-        StartMove();
-
-        
-
+        levelsCollection.UpdateLevels();
     }
+    private void OnStartRun(GameManager.GameState currentGameState, GameManager.GameState previusGameState)
+    {
+        if (currentGameState == GameManager.GameState.EndlessRunning || currentGameState == GameManager.GameState.LevelsRunning)
+        {
+            LastSpawnedSegmentCount = 0;
+            clothesScore = 0;
+            livesText.text = startLives + "";
+            damageImg.gameObject.SetActive(false);
+            YouDiedText.SetActive(false);
+            isMoving = true;
+            minSpeed = levelsCollection.startSpeedLevels[currentLevel];
+            StartEndlessMove();
+        }
+    }
+    #endregion
 
 
     private int _parallaxRootChildren = 0;
     private int _spawnedSegments = 0;
+
     void Update()
     {
-        
+
 
         float scaledSpeed = currentSpeed * Time.deltaTime;
 
@@ -146,7 +166,7 @@ public class TrackManager : Singleton<TrackManager>
 
         Transform characterTransform = characterController.transform;
         Vector3 currentPos = characterTransform.position;
-        
+
 
 
 
@@ -159,7 +179,7 @@ public class TrackManager : Singleton<TrackManager>
 
             Debug.Log("need recenter");
 
-            
+
 
             foreach (TrackSegment trackSegment in m_Segments)
             {
@@ -181,14 +201,14 @@ public class TrackManager : Singleton<TrackManager>
 
     }
 
-    
+
 
     private readonly Vector3 _offScreenSpawnPos = new Vector3(-100f, -100f, -100f);
     public IEnumerator SpawnNewSegment()
     {
         while (_spawnedSegments < trackSegmentCount)
         {
-            Vector3 newPos = new Vector3(horizontalStepDistance/2, -1f, _spawnedSegments * trackSegmentDistance);
+            Vector3 newPos = new Vector3(horizontalStepDistance / 2, -1f, _spawnedSegments * trackSegmentDistance);
             GameObject newSegmentGameObject = Instantiate(segmentPrefab, newPos, Quaternion.identity);
 
             TrackSegment newSegment = newSegmentGameObject.GetComponent<TrackSegment>();
@@ -212,10 +232,10 @@ public class TrackManager : Singleton<TrackManager>
         }
         else
         {
-            
+
             startLives--;
             livesText.text = startLives + "";
-            if(startLives != 0)
+            if (startLives != 0)
                 damageImg.gameObject.SetActive(true);
             else
             {
@@ -223,14 +243,14 @@ public class TrackManager : Singleton<TrackManager>
             }
 
         }
-        
+
     }
     void UpdateUI()
     {
         clothesScoreText.text = clothesScore + "";
     }
 
-    public void StartMove()
+    public void StartEndlessMove()
     {
         currentSpeed = minSpeed;
 
@@ -239,6 +259,8 @@ public class TrackManager : Singleton<TrackManager>
 
         StartCoroutine(SpawnNewSegment());
     }
+
+
     public void StopMoving()
     {
         //currentSpeed = 0;
@@ -268,7 +290,22 @@ public class TrackManager : Singleton<TrackManager>
         GameManager.Instance.RestartLevel();
     }
 
+    private int lastSpawnedSegmentCount;
+    public int LastSpawnedSegmentCount
+    {
+        get
+        {
+            return lastSpawnedSegmentCount++;
+        }
+        private set
+        {
+            lastSpawnedSegmentCount = value;
+        }
 
 
 
+
+
+
+    }
 }

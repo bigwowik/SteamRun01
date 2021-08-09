@@ -22,32 +22,50 @@ public class TrackSegment : MonoBehaviour
 
     public GameObject spawnedObject;
 
+    public int segmentCountIndex;
+
+    public UnityEngine.UI.Text countText;
+
+
+
+
     private void Update()
     {
         if(trackManager.characterController.transform.position.z >= transform.position.z + trackManager.trackSegmentTeleportDistance)
         {
             NewSpawn();
         }
+         
+        countText.gameObject.SetActive(trackManager.godMode);  // убрать потом
     }
 
     private void Start()
     {
-        SpawnObjects();
+        Spawn();
     }
 
 
 
     void NewSpawn()
     {
-       
+        transform.position += new Vector3(0, 0, trackManager.trackSegmentDistance * trackManager.trackSegmentCount); //перемещение платформы
 
-        transform.position += new Vector3(0, 0, trackManager.trackSegmentDistance * trackManager.trackSegmentCount);
-        
-            SpawnObjects();
-
+        Spawn();
     }
 
-    void SpawnObjects()
+    void Spawn()
+    {
+        if (GameManager.Instance.CurrentGameState == GameManager.GameState.EndlessRunning)
+        {
+            SpawnRandomObjects();
+        }
+        else if (GameManager.Instance.CurrentGameState == GameManager.GameState.LevelsRunning)
+        {
+            SpawnLevels(); 
+        }
+    }
+
+    void SpawnRandomObjects()
     {
         if (Vector3.Distance(transform.position, trackManager.characterController.transform.position) > trackManager.startSpawnObjectDistance)
         {
@@ -87,4 +105,68 @@ public class TrackSegment : MonoBehaviour
 
         
     }
+    void SpawnLevels()
+    {
+        if (spawnedObject != null)
+            Destroy(spawnedObject);
+
+
+        segmentCountIndex = trackManager.LastSpawnedSegmentCount;
+        countText.text = segmentCountIndex + "";
+        
+
+        Debug.Log(gameObject.name + " " + segmentCountIndex);
+
+        LevelsCollection levelsCollection = trackManager.levelsCollection;
+
+        if (levelsCollection.levelDataDict[trackManager.currentLevel]?.levelTileDatas.Count <= segmentCountIndex)
+        {
+            Debug.Log("Level Ended." + segmentCountIndex);
+            return;
+        }
+            
+
+        var currentTiledata = levelsCollection.levelDataDict[trackManager.currentLevel].levelTileDatas[segmentCountIndex];
+
+        if (currentTiledata != null)
+        {
+            var randomX = trackManager.horizontalStepDistance / 2;
+
+            SelectAndSpawnClothes(currentTiledata.leftSide, -randomX);
+            SelectAndSpawnClothes(currentTiledata.rightSide, randomX);
+        }
+
+
+    }
+    void SelectAndSpawnClothes(string tileData, float xPos)
+    {
+        Vector3 newSpawnObjPos;
+        switch (tileData)
+        {
+
+            case "0":
+                newSpawnObjPos = new Vector3(trackManager.horizontalStepDistance / 2 + xPos, -0.6f, transform.position.z);
+                spawnedObject = Instantiate(trackManager.clothes[0], newSpawnObjPos, Quaternion.identity, transform);
+                break;
+            case "1":
+                newSpawnObjPos = new Vector3(trackManager.horizontalStepDistance / 2 + xPos, -0.6f, transform.position.z);
+                spawnedObject = Instantiate(trackManager.clothes[1], newSpawnObjPos, Quaternion.identity, transform);
+                break;
+            case "2":
+                newSpawnObjPos = new Vector3(trackManager.horizontalStepDistance / 2 + xPos, -0.6f, transform.position.z);
+                spawnedObject = Instantiate(trackManager.clothes[2], newSpawnObjPos, Quaternion.identity, transform);
+                break;
+            case "up":
+                newSpawnObjPos = new Vector3(trackManager.horizontalStepDistance / 2 + xPos, trackManager.jumpHeight * 0.75f, transform.position.z);
+                spawnedObject = Instantiate(trackManager.upClothes[Random.Range(0, trackManager.upClothes.Length)], newSpawnObjPos, Quaternion.identity, transform);
+                break;
+
+            default:
+                Debug.Log("empty");
+                break;
+        }
+    }
+
+
 }
+

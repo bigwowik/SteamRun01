@@ -43,6 +43,8 @@ public class PlayerMovement : MonoBehaviour
 
 	float lastClickTime;
 
+	
+
 	private void Awake()
     {
     }
@@ -51,16 +53,30 @@ public class PlayerMovement : MonoBehaviour
 
 	public void GodModeButton()
     {
-		Debug.Log("GodMode.");
-		trackManager.startLives = 9999;
-		trackManager.livesText.text = trackManager.startLives + "";
+		if (!trackManager.godMode)
+		{
+			Debug.Log("GodMode on.");
+			trackManager.startLives = 9999;
+			trackManager.livesText.text = trackManager.startLives + "";
+			trackManager.godMode = true;
+        }
+        else
+        {
+			Debug.Log("GodMode off.");
+			trackManager.startLives = 2;
+			trackManager.livesText.text = trackManager.startLives + "";
+			trackManager.godMode = false;
+		}
 	}
 
 	protected void Update()
 	{
-//#if UNITY_EDITOR || UNITY_STANDALONE
+		//#if UNITY_EDITOR || UNITY_STANDALONE
 		// Use key input in editor or standalone
 		// disabled if it's tutorial and not thecurrent right tutorial level (see func TutorialMoveCheck)
+
+		if (!trackManager.isMoving)
+			return;
 
 		if (Input.GetKeyDown(KeyCode.LeftArrow) || (Input.GetKeyDown(KeyCode.A)))
 		{
@@ -91,9 +107,7 @@ public class PlayerMovement : MonoBehaviour
 		}
 		else if (Input.GetKeyDown(KeyCode.Tab))
 		{
-			Debug.Log("GodMode.");
-			trackManager.startLives = 9999;
-			trackManager.livesText.text = trackManager.startLives + "";
+			GodModeButton();
 		}
 
 //#else
