@@ -51,8 +51,9 @@ public class PlayerMovement : MonoBehaviour
 	public GameObject steamFlow;
 	
 
-	private void Awake()
+	private void Start()
     {
+		GameManager.Instance.OnGameStateChanged.AddListener(OnStartLevel);
     }
     // Update is called once per frame
     
@@ -73,6 +74,18 @@ public class PlayerMovement : MonoBehaviour
 			trackManager.livesText.text = trackManager.currentLives + "";
 			trackManager.godMode = false;
 		}
+	}
+
+	void OnStartLevel(GameManager.GameState currentGameState, GameManager.GameState previusGameState)
+	{
+		if ((currentGameState == GameManager.GameState.LevelsRunning || currentGameState == GameManager.GameState.EndlessRunning) && !trackManager.wasDied)
+		{
+			//reset on start new level
+			transform.position = new Vector3(0, 0, 0);
+			ChangeLane(-1);
+
+		}
+
 	}
 
 	protected void Update()

@@ -119,14 +119,14 @@ public class TrackSegment : MonoBehaviour
 
         LevelsCollection levelsCollection = trackManager.levelsCollection;
 
-        if (levelsCollection.levelDataDict[trackManager.currentLevel]?.levelTileDatas.Count <= segmentCountIndex)
+        if (levelsCollection.levelDataDict[GameManager.Instance.LEVELPROGRESS]?.levelTileDatas.Count <= segmentCountIndex)
         {
             Debug.Log("Level Ended." + segmentCountIndex);
             return;
         }
             
 
-        var currentTiledata = levelsCollection.levelDataDict[trackManager.currentLevel].levelTileDatas[segmentCountIndex];
+        var currentTiledata = levelsCollection.levelDataDict[GameManager.Instance.LEVELPROGRESS].levelTileDatas[segmentCountIndex];
 
         if (currentTiledata != null)
         {
@@ -160,9 +160,13 @@ public class TrackSegment : MonoBehaviour
                 newSpawnObjPos = new Vector3(trackManager.horizontalStepDistance / 2 + xPos, trackManager.jumpHeight * 0.75f, transform.position.z);
                 spawnedObject = Instantiate(trackManager.upClothes[Random.Range(0, trackManager.upClothes.Length)], newSpawnObjPos, Quaternion.identity, transform);
                 break;
+            case "end":
+                newSpawnObjPos = new Vector3(trackManager.horizontalStepDistance / 2 + xPos, trackManager.jumpHeight * 0.75f, transform.position.z);
+                spawnedObject = Instantiate(trackManager.endLevelTrigger, newSpawnObjPos, Quaternion.identity, transform);
+                break;
 
             default:
-                Debug.Log("empty");
+                //Debug.Log("empty");
                 break;
         }
     }

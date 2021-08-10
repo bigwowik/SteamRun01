@@ -15,6 +15,8 @@ public class GameManager : Singleton<GameManager>
         PREGAME,
         EndlessRunning,
         LevelsRunning,
+        WIN,
+        FAILURE,
         PAUSED
     }
     public EventGameState OnGameStateChanged; 
@@ -22,6 +24,10 @@ public class GameManager : Singleton<GameManager>
     public GameState _currentGameState = GameState.PREGAME;
 
     private GameState gameStateBeforePause;
+
+
+    public int LEVELPROGRESS;
+
 
     #region GameStates
     public GameState CurrentGameState
@@ -48,6 +54,14 @@ public class GameManager : Singleton<GameManager>
             case GameState.LevelsRunning:
                 // меню паузы
                 Time.timeScale = 1.0f;
+                break;
+            case GameState.WIN:
+                // меню паузы
+                Time.timeScale = 1f;
+                break;
+            case GameState.FAILURE:
+                // меню паузы
+                Time.timeScale = 1f;
                 break;
             case GameState.PAUSED:
                 // меню паузы
@@ -92,6 +106,23 @@ public class GameManager : Singleton<GameManager>
             UpdateState(GameState.LevelsRunning);
         }
     }
+
+    public void SetWinState()
+    {
+        if (_currentGameState != GameState.WIN)
+        {
+            gameStateBeforePause = _currentGameState;
+            UpdateState(GameState.WIN);
+        }
+    }
+    public void SetFailureState()
+    {
+        if (_currentGameState != GameState.FAILURE)
+        {
+            gameStateBeforePause = _currentGameState;
+            UpdateState(GameState.FAILURE);
+        }
+    }
     #endregion
 
     public void RestartLevel() 
@@ -101,7 +132,7 @@ public class GameManager : Singleton<GameManager>
 
     private void Start()
     {
-       // UpdateState(GameState.RUNNING);
+         UpdateState(GameState.PREGAME);
     }
 
 

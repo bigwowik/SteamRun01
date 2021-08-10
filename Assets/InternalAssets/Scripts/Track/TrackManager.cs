@@ -64,6 +64,8 @@ public class TrackManager : Singleton<TrackManager>
     public GameObject[] clothes;
     //up objects
     public GameObject[] upClothes;
+    //up objects
+    public GameObject endLevelTrigger;
 
     protected const float k_SegmentRemovalDistance = -30f; // когда удаляются платформы
 
@@ -112,7 +114,9 @@ public class TrackManager : Singleton<TrackManager>
     public Text speedText;
     public Text livesText;
     public Image damageImg;
-    public GameObject YouDiedText;
+    public GameObject failureWindow;
+
+    public Text currentLevelInt;
 
     public bool isMoving = false;
 
@@ -132,6 +136,9 @@ public class TrackManager : Singleton<TrackManager>
 
     public Image shieldTimerImage;
 
+    public bool wasDied = false;
+    bool ADSwasWatched = false;
+
     #region Start
     private void Start()
     {
@@ -143,18 +150,98 @@ public class TrackManager : Singleton<TrackManager>
     }
     private void OnStartRun(GameManager.GameState currentGameState, GameManager.GameState previusGameState)
     {
-        if (currentGameState == GameManager.GameState.EndlessRunning || currentGameState == GameManager.GameState.LevelsRunning)
+        if ((currentGameState == GameManager.GameState.EndlessRunning || currentGameState == GameManager.GameState.LevelsRunning) && !wasDied)
         {
-            LastSpawnedSegmentCount = 0;
-            clothesScore = 0;
-            livesText.text = currentLives + "";
-            damageImg.gameObject.SetActive(false);
-            YouDiedText.SetActive(false);
-            isMoving = true;
-            minSpeed = levelsCollection.startSpeedLevels[currentLevel];
-            StartEndlessMove();
+            Debug.Log("Start game.");
+            StartGame();
+        }
+        else if ((currentGameState == GameManager.GameState.EndlessRunning || currentGameState == GameManager.GameState.LevelsRunning) && wasDied)
+        {
+            Debug.Log("Continue game.");
+            ConinueGame();
+        }
+        else
+        {
+            //
         }
     }
+
+    void StartGame()
+    {
+        foreach (TrackSegment seg in m_Segments)
+            Destroy(seg.gameObject);
+        
+        m_Segments.Clear();
+        _spawnedSegments = 0;
+
+
+
+
+        wasDied = false;
+        LastSpawnedSegmentCount = 0;
+        clothesScore = 0;
+        currentLives = startLives;
+        livesText.text = currentLives + "";
+        damageImg.gameObject.SetActive(false);
+        failureWindow.SetActive(false);
+        
+        minSpeed = levelsCollection.startSpeedLevels[GameManager.Instance.LEVELPROGRESS];
+        currentSpeed = minSpeed;
+
+
+        currentLevelInt.text = GameManager.Instance.LEVELPROGRESS + "";
+        isMoving = true;
+        StartEndlessMove();
+
+        
+        Debug.Log("new level progress: " + GameManager.Instance.LEVELPROGRESS);
+    }
+
+    void ConinueGame()
+    {
+        isMoving = true;
+        wasDied = false;
+        damageImg.gameObject.SetActive(false);
+        currentLives = startLives;
+        livesText.text = currentLives + "";
+
+    }
+
+    private void PauseMenu()
+    {
+        isMoving = false;
+    }
+    public void EndLevel()
+    {
+        isMoving = false;
+        GameManager.Instance.SetWinState();
+        if (GameManager.Instance.LEVELPROGRESS + 1 >= levelsCollection.levelDataDict.Count)
+        {
+            GameManager.Instance.LEVELPROGRESS = 0;
+        }
+        else
+        {
+            GameManager.Instance.LEVELPROGRESS++;
+        }
+        //Debug.Log("new level progress: " + GameManager.LEVELPROGRESS);
+    }
+
+    public void StartNextLevel()
+    {
+        //isMoving = true;
+        wasDied = false;
+        GameManager.Instance.SetStartRunningLevels();
+        
+    }
+
+    public void ContinueADS()
+    {
+        GameManager.Instance.SetStartRunningLevels();
+
+    }
+
+
+
     #endregion
 
 
@@ -254,7 +341,7 @@ public class TrackManager : Singleton<TrackManager>
             damageImg.gameObject.SetActive(true);
         else
         {
-            StopMoving();
+            YouFail();
         }
     }
 
@@ -304,22 +391,19 @@ public class TrackManager : Singleton<TrackManager>
 
     public void StartEndlessMove()
     {
-        currentSpeed = minSpeed;
-
-        isMoving = true;
-
-
         StartCoroutine(SpawnNewSegment());
     }
 
 
-    public void StopMoving()
+    public void YouFail()
     {
-        //currentSpeed = 0;
-
         isMoving = false;
-        YouDiedText.SetActive(true);
-        Invoke("Restart", 3f);
+        failureWindow.SetActive(true);
+        wasDied = true;
+        GameManager.Instance.SetFailureState();
+
+
+        //Invoke("Restart", 3f);
 
 
     }

@@ -15,6 +15,14 @@ MonoBehaviour:
   levels:
   - {fileID: 4900000, guid: a08d0772d2114bb4d81945aae1fae6e7, type: 3}
   - {fileID: 4900000, guid: f831dffd66f3f7741bcca339ccba654d, type: 3}
+  - {fileID: 4900000, guid: f4b58a0394ae8b44fab38980209eb7a2, type: 3}
+  - {fileID: 4900000, guid: 21e7022ccc6da174386b7f049ef5b998, type: 3}
+  - {fileID: 4900000, guid: 2fdbaecb09db7f842a68f12673724e69, type: 3}
+  - {fileID: 4900000, guid: 7bac18cd8a36b8e4ab73e587518fd289, type: 3}
   startSpeedLevels:
+  - 5
+  - 5
+  - 5
+  - 5
   - 5
   - 5
