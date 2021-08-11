@@ -47,18 +47,37 @@ public class TrackManager : Singleton<TrackManager>
     public float jumpSpeed = 3f;
 
 
+    protected const float k_FloatingOriginThreshold = 10000f;
+    protected const float k_Acceleration = 0.2f;
+    public float timeToDoubleTap = 0.20f;
+
+
 
     [Header("Спавн")]
-    public float startSpawnObjectDistance = 20f;
-
+    public int startSpawnObjectIndex = 1;
+    [Header("Распределние спавна")]
+    public int buffPercent = 20;
+    public int debuffPercent = 20;
     public int upClothPercent = 35;
+    public int cloth0Percent = 5;
+    public int cloth1Percent = 5;
+    public int cloth2Percent = 5;
     public int emptyClothPercent = 20;
-
-
+    [Header("Какие интервалы у объектов")]
+    public int buffInterval = 5;
+    public int debuffInterval = 5;
+    [Header("Настройки сегментов")]
     public float trackSegmentDistance = 10f;//длина сегмента
     public int trackSegmentCount = 10; //start count of segments
     public float trackSegmentTeleportDistance = 20f;//расстояние для телепорта
 
+    [HideInInspector]
+    public int lastBuffSegmentIndex;
+    [HideInInspector]
+    public int lastDebuffSegmentIndex;
+
+    [Header("Сегменты")]
+    public GameObject segmentPrefab;
 
     //clothes objects
     public GameObject[] clothes;
@@ -66,6 +85,11 @@ public class TrackManager : Singleton<TrackManager>
     public GameObject[] upClothes;
     //up objects
     public GameObject endLevelTrigger;
+    //buff objects
+    public GameObject[] buffObjects; // 0 - огнетушитель хиллер, 1 - щит
+    //debuff objects
+    public GameObject[] debuffObjects;  // 0 - лужа 
+
 
     protected const float k_SegmentRemovalDistance = -30f; // когда удаляются платформы
 
@@ -77,67 +101,68 @@ public class TrackManager : Singleton<TrackManager>
 
 
 
-
-    public bool invincible = false;
-
-
-    public GameObject segmentPrefab;
-
-    public List<TrackSegment> segments { get { return m_Segments; } }
-
-
-    protected float m_CurrentSegmentDistance;
-
-    protected List<TrackSegment> m_Segments = new List<TrackSegment>();
-
-
-    protected List<TrackSegment> m_PastSegments = new List<TrackSegment>();
-
-
-    const float k_FloatingOriginThreshold = 10000f;
-
-    protected const float k_Acceleration = 0.2f;
-
-
-
-    public Transform cinemachineCamera;
-
-
     protected float m_TotalWorldDistance;
     protected int lastSegmentCount;
 
+    
+    public List<TrackSegment> segments { get { return m_Segments; } }
+    protected float m_CurrentSegmentDistance;
+    protected List<TrackSegment> m_Segments = new List<TrackSegment>();
+    protected List<TrackSegment> m_PastSegments = new List<TrackSegment>();
 
+    private int _spawnedSegments = 0;
 
-    int clothesScore;
+    private int lastSpawnedSegmentCount;
+    public int LastSpawnedSegmentCount
+    {
+        get
+        {
+            return lastSpawnedSegmentCount++;
+        }
+        private set
+        {
+            lastSpawnedSegmentCount = value;
+        }
+    }
+    public int GetLastSpawnedSegmentIndex()
+    {
+        return lastSpawnedSegmentCount;
+    }
 
+    [Header("Камера")]
+    public Transform cinemachineCamera;
+
+    [Header("UI")]
+    public GameObject scorePanel;
     public Text clothesScoreText;
+    public Text clothesScoreTextWin;
+    public Text clothesScoreTextFail;
     public Text speedText;
     public Text livesText;
     public Image damageImg;
     public GameObject failureWindow;
-
     public Text currentLevelInt;
+    public Image shieldTimerImage;
 
+    [Header("Состояние")]
+    int clothesScore;
+
+    [HideInInspector]
     public bool isMoving = false;
+    [HideInInspector]
+    public bool godMode;
+    [HideInInspector]
+    public bool wasDied = false; //умер ли игрок один раз уже
 
-    public float timeToDoubleTap = 0.5f;
-
+    [Header("Уровни")]
     public int currentLevel = 0;
-
     public LevelsCollection levelsCollection;
 
 
-    [HideInInspector]
-    public bool godMode;
+    // other
+    IEnumerator shieldEnumerator; //таймер действия щита
+    public bool isProtectedByShield { get; private set; } 
 
-
-    IEnumerator shieldEnumerator;
-    public bool isProtected { get; private set; }
-
-    public Image shieldTimerImage;
-
-    public bool wasDied = false;
-    bool ADSwasWatched = false;
 
     #region Start
     private void Start()
@@ -154,6 +179,7 @@ public class TrackManager : Singleton<TrackManager>
         {
             Debug.Log("Start game.");
             StartGame();
+            
         }
         else if ((currentGameState == GameManager.GameState.EndlessRunning || currentGameState == GameManager.GameState.LevelsRunning) && wasDied)
         {
@@ -175,7 +201,7 @@ public class TrackManager : Singleton<TrackManager>
         _spawnedSegments = 0;
 
 
-
+        scorePanel.SetActive(true);
 
         wasDied = false;
         LastSpawnedSegmentCount = 0;
@@ -191,14 +217,16 @@ public class TrackManager : Singleton<TrackManager>
 
         currentLevelInt.text = GameManager.Instance.LEVELPROGRESS + "";
         isMoving = true;
-        StartEndlessMove();
+        StartCoroutine(SpawnNewSegment());
 
-        
+
         Debug.Log("new level progress: " + GameManager.Instance.LEVELPROGRESS);
     }
 
     void ConinueGame()
     {
+        scorePanel.SetActive(true);
+
         isMoving = true;
         wasDied = false;
         damageImg.gameObject.SetActive(false);
@@ -244,24 +272,15 @@ public class TrackManager : Singleton<TrackManager>
 
     #endregion
 
-
-    private int _parallaxRootChildren = 0;
-    private int _spawnedSegments = 0;
-
+    #region Update
     void Update()
     {
-
-
         float scaledSpeed = currentSpeed * Time.deltaTime;
 
         m_TotalWorldDistance += scaledSpeed;
 
-
         Transform characterTransform = characterController.transform;
         Vector3 currentPos = characterTransform.position;
-
-
-
 
         // Floating origin implementation
         // Move the whole world back to 0,0,0 when we get too far away.
@@ -270,31 +289,30 @@ public class TrackManager : Singleton<TrackManager>
         if (needRecenter)
         {
 
-            Debug.Log("need recenter");
-
-
+            Debug.Log("Need to recenter.");
 
             foreach (TrackSegment trackSegment in m_Segments)
             {
                 trackSegment.transform.position -= currentPos;
             }
             characterController.transform.position -= currentPos;
-            cinemachineCamera.gameObject.SetActive(false);
-            cinemachineCamera.position -= currentPos;
-            cinemachineCamera.gameObject.SetActive(true);
+            //cinemachineCamera.gameObject.SetActive(false);
+            //cinemachineCamera.position -= currentPos;
+            //cinemachineCamera.gameObject.SetActive(true);
         }
 
-
         //ускорение со временем
-        SpeedUp();
+        if(isMoving)
+            SpeedUp();
 
         //обновление скорсти на экране
         UpdateSpeedUI();
 
 
     }
+    #endregion
 
-
+    #region Spawn
 
     private readonly Vector3 _offScreenSpawnPos = new Vector3(-100f, -100f, -100f);
     public IEnumerator SpawnNewSegment()
@@ -314,8 +332,9 @@ public class TrackManager : Singleton<TrackManager>
         yield return null;
 
     }
+    #endregion
 
-
+    #region Score and lives
     public void UpScore(int amount)
     {
         if (amount > 0)
@@ -332,7 +351,7 @@ public class TrackManager : Singleton<TrackManager>
 
     public void Damage()
     {
-        if (isProtected)
+        if (isProtectedByShield)
             return;
 
         currentLives--;
@@ -347,17 +366,33 @@ public class TrackManager : Singleton<TrackManager>
 
     
 
+    public void YouFail()
+    {
+        isMoving = false;
+        failureWindow.SetActive(true);
+        wasDied = true;
+        GameManager.Instance.SetFailureState();
+
+    }
+
+    void Restart()
+    {
+        GameManager.Instance.RestartLevel();
+    }
+    #endregion
+
+    #region Buffs and debuffs
+
     public void Healing()
     {
         //if (currentLives + 1 >= startLives)
-            currentLives = startLives;
+        currentLives = startLives;
         //else
         //    currentLives++;
         livesText.text = currentLives + "";
         damageImg.gameObject.SetActive(false);
-        
-    }
 
+    }
     public void SetShield(float shieldTime)
     {
         shieldEnumerator = ShieldStart(shieldTime);
@@ -366,7 +401,7 @@ public class TrackManager : Singleton<TrackManager>
 
     IEnumerator ShieldStart(float shieldTime)
     {
-        isProtected = true;
+        isProtectedByShield = true;
         float timer = 0;
         shieldTimerImage.gameObject.SetActive(true);
         while (timer < shieldTime)
@@ -379,35 +414,26 @@ public class TrackManager : Singleton<TrackManager>
 
         shieldTimerImage.gameObject.SetActive(false);
         //yield return new WaitForSeconds(shieldTime);
-        isProtected = false;
+        isProtectedByShield = false;
         yield return null;
     }
+    #endregion
 
-
+    #region UI
     void UpdateUI()
     {
         clothesScoreText.text = clothesScore + "";
+        clothesScoreTextWin.text = clothesScore + "";
+        clothesScoreTextFail.text = clothesScore + "";
     }
 
-    public void StartEndlessMove()
+    void UpdateSpeedUI()
     {
-        StartCoroutine(SpawnNewSegment());
+        speedText.text = currentSpeed + "";
     }
+    #endregion
 
-
-    public void YouFail()
-    {
-        isMoving = false;
-        failureWindow.SetActive(true);
-        wasDied = true;
-        GameManager.Instance.SetFailureState();
-
-
-        //Invoke("Restart", 3f);
-
-
-    }
-
+    #region Moving
     void SpeedUp()
     {
         if (currentSpeed < maxSpeed)
@@ -416,32 +442,11 @@ public class TrackManager : Singleton<TrackManager>
             currentSpeed = maxSpeed;
     }
 
-    void UpdateSpeedUI()
-    {
-        speedText.text = currentSpeed + "";
-    }
-
-    void Restart()
-    {
-        GameManager.Instance.RestartLevel();
-    }
-
-    private int lastSpawnedSegmentCount;
-    public int LastSpawnedSegmentCount
-    {
-        get
-        {
-            return lastSpawnedSegmentCount++;
-        }
-        private set
-        {
-            lastSpawnedSegmentCount = value;
-        }
+    #endregion
 
 
 
 
 
 
-    }
 }

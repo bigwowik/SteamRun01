@@ -7,5 +7,6 @@ public class Healer : MonoBehaviour, IInteractive
     public void OnInteract()
     {
         TrackManager.Instance.Healing();
+        GetComponent<Collider>().enabled = false;
     }
 }

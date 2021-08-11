@@ -8,5 +8,6 @@ public class Shield : MonoBehaviour, IInteractive
     public void OnInteract()
     {
         TrackManager.Instance.SetShield(shieldTime);
+        GetComponent<Collider>().enabled = false;
     }
 }

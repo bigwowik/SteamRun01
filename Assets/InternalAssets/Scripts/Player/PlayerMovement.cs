@@ -227,7 +227,7 @@ public class PlayerMovement : MonoBehaviour
 			//transform.Translate(0, 0, trackManager.currentSpeed * Time.deltaTime);
 		}
 
-        if (trackManager.isProtected)
+        if (trackManager.isProtectedByShield)
         {
 			shield.SetActive(true);
 

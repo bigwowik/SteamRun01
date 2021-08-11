@@ -7,5 +7,6 @@ public class Puddle : MonoBehaviour, IInteractive
     public void OnInteract()
     {
         TrackManager.Instance.Damage();
+        GetComponent<Collider>().enabled = false;
     }
 }

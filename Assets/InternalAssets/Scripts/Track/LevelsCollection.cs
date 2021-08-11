@@ -35,7 +35,7 @@ public class LevelsCollection : ScriptableObject
         using (TextReader tr = new StringReader(text.ToString()))
         {
             string str;
-            int lineIndex = 0;
+            //int lineIndex = 0;
             List<LevelTileData> level = new List<LevelTileData>();
 
             while ((str = tr.ReadLine()) != null)
