@@ -114,7 +114,7 @@ public class TrackManager : Singleton<TrackManager>
     public float worldDistance { get { return m_TotalWorldDistance; } }
     public float speedRatio { get { return (currentSpeed - minSpeed) / (maxSpeed - minSpeed); } }
 
-    public UnityEvent<int> onPlayerLivesChanged;
+    public UnityEvent onPlayerLivesChanged;
 
 
     protected float m_TotalWorldDistance;
@@ -405,7 +405,7 @@ public class TrackManager : Singleton<TrackManager>
         {
             YouFail();
         }
-        onPlayerLivesChanged.Invoke(-1);
+        onPlayerLivesChanged.Invoke();
     }
 
     
@@ -438,7 +438,7 @@ public class TrackManager : Singleton<TrackManager>
         livesText.text = currentLives + "";
         damageImg.gameObject.SetActive(false);
 
-        onPlayerLivesChanged.Invoke(+1);
+        onPlayerLivesChanged.Invoke();
 
     }
     public void SetShield(float shieldTime)

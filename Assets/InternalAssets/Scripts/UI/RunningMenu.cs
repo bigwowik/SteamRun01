@@ -20,12 +20,15 @@ public class RunningMenu : MonoBehaviour
     }
     private void OnGameStart(GameManager.GameState currentGameState, GameManager.GameState previusGameState)
     {
-        if ((currentGameState == GameManager.GameState.LevelsRunning || currentGameState == GameManager.GameState.EndlessRunning))
+        
+        if ((currentGameState == GameManager.GameState.EndlessRunning))
         {
-            for (int i = 0; i < TrackManager.Instance.StartLives; i++)
-            {
-                SpawnLiveImage();
-            }
+            OnStartImages();
+            livesParent.gameObject.SetActive(true);
+        }
+        else if(currentGameState == GameManager.GameState.LevelsRunning)
+        {
+            livesParent.gameObject.SetActive(false);
         }
     }
 
@@ -35,13 +38,25 @@ public class RunningMenu : MonoBehaviour
             TrackManager.Instance.onPlayerLivesChanged.RemoveListener(OnLivesChanged);
     }
 
-    void OnLivesChanged(int amount)
+    void OnStartImages()
+    {
+        
+        Debug.Log("On start lives images.");
+
+        for (int i = 0; i < TrackManager.Instance.StartLives; i++)
+        {
+            livesImagesList.Add(Instantiate(livesImagePrefab, livesParent));
+        }
+    }
+
+    void OnLivesChanged()
     {
         for (int i = 0; i < livesImagesList.Count; i++)
         {
             Destroy(livesImagesList[i]);
         }
         livesImagesList.Clear();
+        Debug.Log("On lives changed.");
 
         for (int i = 0; i < TrackManager.Instance.currentLives; i++)
         {
