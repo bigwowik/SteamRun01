@@ -49,11 +49,19 @@ public class PlayerMovement : MonoBehaviour
 	public Transform steamPoint;
 
 	public GameObject steamFlow;
-	
 
-	private void Start()
+	private Animator animator;
+
+    private void Awake()
+    {
+		animator = GetComponentInChildren<Animator>();
+
+
+	}
+    private void Start()
     {
 		GameManager.Instance.OnGameStateChanged.AddListener(OnStartLevel);
+
     }
     // Update is called once per frame
     
@@ -78,12 +86,15 @@ public class PlayerMovement : MonoBehaviour
 
 	void OnStartLevel(GameManager.GameState currentGameState, GameManager.GameState previusGameState)
 	{
-		if ((currentGameState == GameManager.GameState.LevelsRunning || currentGameState == GameManager.GameState.EndlessRunning) && !trackManager.wasDied)
+		if ((currentGameState == GameManager.GameState.LevelsRunning || currentGameState == GameManager.GameState.EndlessRunning) && previusGameState == GameManager.GameState.PAUSED)
+		{
+			return; //no reset after pause
+		}
+		else if ((currentGameState == GameManager.GameState.LevelsRunning || currentGameState == GameManager.GameState.EndlessRunning) && !trackManager.wasDied)
 		{
 			//reset on start new level
 			transform.position = new Vector3(0, 0, 0);
 			ChangeLane(-1);
-
 		}
 
 	}
@@ -94,7 +105,7 @@ public class PlayerMovement : MonoBehaviour
 		// Use key input in editor or standalone
 		// disabled if it's tutorial and not thecurrent right tutorial level (see func TutorialMoveCheck)
 
-		if (!trackManager.isMoving)
+		if (!trackManager.isMoving || GameManager.Instance.CurrentGameState == GameManager.GameState.PAUSED)  // не уверен на счет этого, обращение с синглотну в апдейте
 			return;
 
 		if (Input.GetKeyDown(KeyCode.LeftArrow) || (Input.GetKeyDown(KeyCode.A)))
@@ -249,7 +260,7 @@ public class PlayerMovement : MonoBehaviour
 		if (!m_Jumping)
 		{
 			//Debug.Log("Jump");
-			GetComponentInChildren<Animator>().SetTrigger("Jump");
+			animator.SetTrigger("Jump");
 
 			float correctJumpLength = trackManager.jumpLength * (1.0f + trackManager.speedRatio);
 
@@ -282,7 +293,7 @@ public class PlayerMovement : MonoBehaviour
 
 				if (!m_Jumping)
 				{
-					GetComponentInChildren<Animator>().SetTrigger("Steam2");
+					animator.SetTrigger("Steam2");
 				}
 
 			}
@@ -299,7 +310,7 @@ public class PlayerMovement : MonoBehaviour
 
 				if (!m_Jumping)
 				{
-					GetComponentInChildren<Animator>().SetTrigger("Steam1");
+					animator.SetTrigger("Steam1");
 				}
 
 			}
@@ -336,6 +347,16 @@ public class PlayerMovement : MonoBehaviour
 	{
 		//if (!m_IsRunning)
 		//	return;
+
+		if (!m_Jumping)
+		{
+			if(direction < 0)
+				animator.SetTrigger("Left");
+			else
+				animator.SetTrigger("Right");
+		}
+
+
 
 		int targetLane = m_CurrentLane + direction;
 

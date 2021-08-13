@@ -194,7 +194,15 @@ public class TrackManager : Singleton<TrackManager>
     }
     private void OnStartRun(GameManager.GameState currentGameState, GameManager.GameState previusGameState)
     {
-        if ((currentGameState == GameManager.GameState.EndlessRunning || currentGameState == GameManager.GameState.LevelsRunning) && !wasDied)
+        if ((currentGameState == GameManager.GameState.EndlessRunning || currentGameState == GameManager.GameState.LevelsRunning) && previusGameState == GameManager.GameState.PAUSED)
+        {
+            ConinueGameAfterPause();
+            Debug.Log("Coninue Game After Pause");
+            //StartGame();
+
+        }
+
+        else if ((currentGameState == GameManager.GameState.EndlessRunning || currentGameState == GameManager.GameState.LevelsRunning) && !wasDied)
         {
             Debug.Log("Start game.");
             StartGame();
@@ -203,7 +211,7 @@ public class TrackManager : Singleton<TrackManager>
         else if ((currentGameState == GameManager.GameState.EndlessRunning || currentGameState == GameManager.GameState.LevelsRunning) && wasDied)
         {
             Debug.Log("Continue game.");
-            ConinueGame();
+            ConinueGameAfterADS();
         }
         else
         {
@@ -246,7 +254,7 @@ public class TrackManager : Singleton<TrackManager>
         Debug.Log("new level progress: " + GameManager.Instance.LEVELPROGRESS);
     }
 
-    void ConinueGame()
+    void ConinueGameAfterADS()
     {
         scorePanel.SetActive(true);
 
@@ -255,6 +263,11 @@ public class TrackManager : Singleton<TrackManager>
         damageImg.gameObject.SetActive(false);
         currentLives = StartLives;
         livesText.text = currentLives + "";
+    }
+
+    void ConinueGameAfterPause()
+    {
+        isMoving = true;
     }
     public void ContinueADS()
     {

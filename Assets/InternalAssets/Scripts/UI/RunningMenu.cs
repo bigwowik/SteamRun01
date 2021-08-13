@@ -1,22 +1,26 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 
 public class RunningMenu : MonoBehaviour
 {
     //жизни героя
     public Transform livesParent;
-    public GameObject livesImagePrefab;
-    private List<GameObject> livesImagesList = new List<GameObject>();
-    //жизни героя
+    public Image livesImageFiller;
+    private float[] fillAmounts = { 0, 0.187f, 0.332f, 0.48f, 0.635f, 1f };
 
-
+    public GameObject runningMenuObject;
+    public GameObject pauseBackground;
 
     void Start()
     {
         GameManager.Instance.OnGameStateChanged.AddListener(OnGameStart);
         TrackManager.Instance.onPlayerLivesChanged.AddListener(OnLivesChanged);
+
+        runningMenuObject.SetActive(false);
+
     }
     private void OnGameStart(GameManager.GameState currentGameState, GameManager.GameState previusGameState)
     {
@@ -25,11 +29,22 @@ public class RunningMenu : MonoBehaviour
         {
             OnStartImages();
             livesParent.gameObject.SetActive(true);
+            runningMenuObject.SetActive(true);
+            pauseBackground.SetActive(false);
         }
         else if(currentGameState == GameManager.GameState.LevelsRunning)
         {
             livesParent.gameObject.SetActive(false);
+            runningMenuObject.SetActive(true);
+            pauseBackground.SetActive(false);
         }
+        else if (currentGameState == GameManager.GameState.PAUSED)
+        {
+            pauseBackground.SetActive(true);
+
+        }
+        
+
     }
 
     private void OnDisable()
@@ -40,40 +55,30 @@ public class RunningMenu : MonoBehaviour
 
     void OnStartImages()
     {
-        
+        SetLivesImage(TrackManager.Instance.StartLives);
         Debug.Log("On start lives images.");
-
-        for (int i = 0; i < TrackManager.Instance.StartLives; i++)
-        {
-            livesImagesList.Add(Instantiate(livesImagePrefab, livesParent));
-        }
     }
 
     void OnLivesChanged()
     {
-        for (int i = 0; i < livesImagesList.Count; i++)
-        {
-            Destroy(livesImagesList[i]);
-        }
-        livesImagesList.Clear();
         Debug.Log("On lives changed.");
+        SetLivesImage(TrackManager.Instance.currentLives);
 
-        for (int i = 0; i < TrackManager.Instance.currentLives; i++)
-        {
-            livesImagesList.Add(Instantiate(livesImagePrefab, livesParent));
-        }
+    }
+    void SetLivesImage(int livesCount)
+    {
+        float fill = fillAmounts[livesCount];
+        livesImageFiller.fillAmount = fill;
     }
 
-    #region Lives changes
-    void SpawnLiveImage()
+
+    
+    public void PauseToggle()
     {
-        livesImagesList.Add(Instantiate(livesImagePrefab, livesParent));
+        GameManager.Instance.TogglePause();
+        //Debug.Log("Pause to");
     }
-    void RemoveLiveImage()
-    {
-        Destroy(livesImagesList[livesImagesList.Count - 1]);
-        livesImagesList.RemoveAt(livesImagesList.Count - 1);
-        Debug.LogFormat("Lives was removed.");
-    }
-    #endregion
+
+
+
 }
