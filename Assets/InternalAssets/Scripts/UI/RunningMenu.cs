@@ -31,7 +31,8 @@ public class RunningMenu : MonoBehaviour
 
     private void OnDisable()
     {
-        TrackManager.Instance.onPlayerLivesChanged.RemoveListener(OnLivesChanged);
+        if(TrackManager.Instance != null)
+            TrackManager.Instance.onPlayerLivesChanged.RemoveListener(OnLivesChanged);
     }
 
     void OnLivesChanged(int amount)
