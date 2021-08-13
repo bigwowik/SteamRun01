@@ -9,5 +9,6 @@ public class Shield : MonoBehaviour, IInteractive
     {
         TrackManager.Instance.SetShield(shieldTime);
         GetComponent<Collider>().enabled = false;
+        GetComponentInChildren<MeshRenderer>().material.color = Color.white;
     }
 }

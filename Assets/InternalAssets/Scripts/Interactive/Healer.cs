@@ -8,5 +8,6 @@ public class Healer : MonoBehaviour, IInteractive
     {
         TrackManager.Instance.Healing();
         GetComponent<Collider>().enabled = false;
+        GetComponentInChildren<MeshRenderer>().material.color = Color.white;
     }
 }

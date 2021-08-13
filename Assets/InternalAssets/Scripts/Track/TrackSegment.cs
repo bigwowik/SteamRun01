@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -20,7 +21,7 @@ public class TrackSegment : MonoBehaviour
     [HideInInspector]
     public float[] obstaclePositions;
 
-    public GameObject spawnedObject;
+    public List<GameObject> spawnedObjects = new List<GameObject>();
 
     public int segmentCountIndex;
 
@@ -66,10 +67,18 @@ public class TrackSegment : MonoBehaviour
         }
     }
 
+    void ResetSegment()
+    {
+        foreach(GameObject obj in spawnedObjects)
+        {
+            Destroy(obj);
+        }
+        spawnedObjects.Clear();
+    }
+
     void SpawnPatterns()
     {
-        if (spawnedObject != null)
-            Destroy(spawnedObject);
+        ResetSegment();
 
         //номер сегмента
         segmentCountIndex = trackManager.GetNewSegmentIndexWithIncrement();
@@ -79,9 +88,20 @@ public class TrackSegment : MonoBehaviour
         if (trackManager.GetLastSpawnedSegmentIndex() < trackManager.startSpawnObjectIndexDelay)
             return;
 
-
-
         Debug.Log(gameObject.name +" was spawned");
+
+
+
+        //спавн баффов и дебаффов
+        if (trackManager.isLastSegmentOfPattern() && SpawnBuffAndDebuff())
+        {
+            Debug.Log("Buff and debuff spawned.");
+            return;
+        }
+            
+
+
+
 
         var currentPattern = trackManager.GetCurrentPattern();
         
@@ -100,11 +120,53 @@ public class TrackSegment : MonoBehaviour
 
     }
 
+    bool SpawnBuffAndDebuff()
+    {
+        float randomX;
+        if (Random.Range(0, 1f) > 0.5f)
+        {
+            randomX = trackManager.horizontalStepDistance / 2;
+        }
+        else
+        {
+            randomX = -trackManager.horizontalStepDistance / 2;
+        }
+
+        var rnd = Random.Range(0, 100f);
+
+        if (trackManager.GetLastSpawnedSegmentIndex() - trackManager.lastBuffSegmentIndex > trackManager.buffInterval)
+        {
+            if (rnd <= trackManager.buffPercent) //  или нижние объекты
+            {
+
+                SpawnClothes(trackManager.buffObjects[Random.Range(0, trackManager.buffObjects.Length)], randomX);
+                trackManager.lastBuffSegmentIndex = segmentCountIndex;
+                Debug.Log("buff on " + segmentCountIndex);
+                return true;
+
+            }
+        }
+        else if (trackManager.GetLastSpawnedSegmentIndex() - trackManager.lastDebuffSegmentIndex > trackManager.debuffInterval)
+        {
+            if (rnd <= trackManager.buffPercent + trackManager.debuffPercent) //  или нижние объекты
+            {
+
+                SpawnClothes(trackManager.debuffObjects[Random.Range(0, trackManager.debuffObjects.Length)], randomX);
+                trackManager.lastDebuffSegmentIndex = segmentCountIndex;
+                Debug.Log("debuff on " + segmentCountIndex);
+                return true;
+
+            }
+        }
+        
+        return false;
+        
+    }
+
 
     void SpawnRandomObjects()
     {
-        if (spawnedObject != null)
-            Destroy(spawnedObject);
+        ResetSegment();
 
         //номер сегмента
         segmentCountIndex = trackManager.GetNewSegmentIndexWithIncrement();
@@ -181,8 +243,7 @@ public class TrackSegment : MonoBehaviour
     }
     void SpawnLevels()
     {
-        if (spawnedObject != null)
-            Destroy(spawnedObject);
+        ResetSegment();
 
 
         segmentCountIndex = trackManager.GetNewSegmentIndexWithIncrement();
@@ -220,35 +281,35 @@ public class TrackSegment : MonoBehaviour
 
             case "0":
                 newSpawnObjPos = new Vector3(trackManager.horizontalStepDistance / 2 + xPos, -0.6f, transform.position.z);
-                spawnedObject = Instantiate(trackManager.clothes[0], newSpawnObjPos, Quaternion.identity, transform);
+                spawnedObjects.Add(Instantiate(trackManager.clothes[0], newSpawnObjPos, Quaternion.identity, transform));
                 break;
             case "1":
                 newSpawnObjPos = new Vector3(trackManager.horizontalStepDistance / 2 + xPos, -0.6f, transform.position.z);
-                spawnedObject = Instantiate(trackManager.clothes[1], newSpawnObjPos, Quaternion.identity, transform);
+                spawnedObjects.Add(Instantiate(trackManager.clothes[1], newSpawnObjPos, Quaternion.identity, transform));
                 break;
             case "2":
                 newSpawnObjPos = new Vector3(trackManager.horizontalStepDistance / 2 + xPos, -0.6f, transform.position.z);
-                spawnedObject = Instantiate(trackManager.clothes[2], newSpawnObjPos, Quaternion.identity, transform);
+                spawnedObjects.Add(Instantiate(trackManager.clothes[2], newSpawnObjPos, Quaternion.identity, transform));
                 break;
             case "up":
                 newSpawnObjPos = new Vector3(trackManager.horizontalStepDistance / 2 + xPos, trackManager.jumpHeight * 0.75f, transform.position.z);
-                spawnedObject = Instantiate(trackManager.upClothes[Random.Range(0, trackManager.upClothes.Length)], newSpawnObjPos, Quaternion.identity, transform);
+                spawnedObjects.Add(Instantiate(trackManager.upClothes[Random.Range(0, trackManager.upClothes.Length)], newSpawnObjPos, Quaternion.identity, transform));
                 break;
             case "end":
                 newSpawnObjPos = new Vector3(trackManager.horizontalStepDistance / 2 + xPos, trackManager.jumpHeight * 0.75f, transform.position.z);
-                spawnedObject = Instantiate(trackManager.endLevelTrigger, newSpawnObjPos, Quaternion.identity, transform);
+                spawnedObjects.Add(Instantiate(trackManager.endLevelTrigger, newSpawnObjPos, Quaternion.identity, transform));
                 break;
             case "heal":
                 newSpawnObjPos = new Vector3(trackManager.horizontalStepDistance / 2 + xPos, -0.6f, transform.position.z);
-                spawnedObject = Instantiate(trackManager.buffObjects[0], newSpawnObjPos, Quaternion.identity, transform);
+                spawnedObjects.Add(Instantiate(trackManager.buffObjects[0], newSpawnObjPos, Quaternion.identity, transform));
                 break;
             case "shield":
                 newSpawnObjPos = new Vector3(trackManager.horizontalStepDistance / 2 + xPos, -0.6f, transform.position.z);
-                spawnedObject = Instantiate(trackManager.buffObjects[1], newSpawnObjPos, Quaternion.identity, transform);
+                spawnedObjects.Add(Instantiate(trackManager.buffObjects[1], newSpawnObjPos, Quaternion.identity, transform));
                 break;
             case "puddle":
                 newSpawnObjPos = new Vector3(trackManager.horizontalStepDistance / 2 + xPos, -0.6f, transform.position.z);
-                spawnedObject = Instantiate(trackManager.debuffObjects[0], newSpawnObjPos, Quaternion.identity, transform);
+                spawnedObjects.Add(Instantiate(trackManager.debuffObjects[0], newSpawnObjPos, Quaternion.identity, transform));
                 break;
 
             default:
@@ -261,7 +322,7 @@ public class TrackSegment : MonoBehaviour
     {
         Vector3 newSpawnObjPos;
         newSpawnObjPos = new Vector3(trackManager.horizontalStepDistance / 2 + xPos, -0.6f, transform.position.z);
-        spawnedObject = Instantiate(gameObjectToSpawn, newSpawnObjPos, Quaternion.identity, transform);
+        spawnedObjects.Add(Instantiate(gameObjectToSpawn, newSpawnObjPos, Quaternion.identity, transform));
     }
 }
 

@@ -8,5 +8,7 @@ public class Puddle : MonoBehaviour, IInteractive
     {
         TrackManager.Instance.Damage();
         GetComponent<Collider>().enabled = false;
+
+        //GetComponentInChildren<MeshRenderer>().material.color = Color.red;
     }
 }

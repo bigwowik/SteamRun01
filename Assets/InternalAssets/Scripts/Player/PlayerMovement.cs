@@ -240,6 +240,7 @@ public class PlayerMovement : MonoBehaviour
 	}
 
 
+
 	public void Jump()
 	{
 		//if (!m_IsRunning)
@@ -248,6 +249,7 @@ public class PlayerMovement : MonoBehaviour
 		if (!m_Jumping)
 		{
 			//Debug.Log("Jump");
+			GetComponentInChildren<Animator>().SetTrigger("Jump");
 
 			float correctJumpLength = trackManager.jumpLength * (1.0f + trackManager.speedRatio);
 
@@ -276,8 +278,13 @@ public class PlayerMovement : MonoBehaviour
 				//double tap
 				Debug.Log("Double Tap");
 				var particles1 = Instantiate(steamFlow, steamPoint);
-				var particles2 = Instantiate(steamFlow, steamPoint); Instantiate(steamFlow, steamPoint);
-				
+				var particles2 = Instantiate(steamFlow, steamPoint); 
+
+				if (!m_Jumping)
+				{
+					GetComponentInChildren<Animator>().SetTrigger("Steam2");
+				}
+
 			}
 			else
 			{
@@ -290,7 +297,16 @@ public class PlayerMovement : MonoBehaviour
 				Debug.Log("Single Tap");
 				Instantiate(steamFlow, steamPoint);
 
+				if (!m_Jumping)
+				{
+					GetComponentInChildren<Animator>().SetTrigger("Steam1");
+				}
+
 			}
+
+            
+
+
 			SetCameraInpulse();
 
 

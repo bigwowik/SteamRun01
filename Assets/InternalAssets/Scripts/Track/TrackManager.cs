@@ -35,6 +35,7 @@ public class TrackManager : Singleton<TrackManager>
     [Header("Character & Movements")]
     public PlayerMovement characterController;
     [Header("Скорость")]
+    public float minSpeedForEndless = 7.0f;
     public float minSpeed = 5.0f;
     public float maxSpeed = 10.0f;
     public float currentSpeed = 0.03f;
@@ -229,8 +230,11 @@ public class TrackManager : Singleton<TrackManager>
         livesText.text = currentLives + "";
         damageImg.gameObject.SetActive(false);
         failureWindow.SetActive(false);
-        
-        minSpeed = levelsCollection.startSpeedLevels[GameManager.Instance.LEVELPROGRESS];
+
+        if (GameManager.Instance.CurrentGameState == GameManager.GameState.LevelsRunning)
+            minSpeed = levelsCollection.startSpeedLevels[GameManager.Instance.LEVELPROGRESS];
+        else
+            minSpeed = minSpeedForEndless;
         currentSpeed = minSpeed;
 
 
@@ -374,6 +378,11 @@ public class TrackManager : Singleton<TrackManager>
             return patternsCollection.levelDataDict[currentPatternID];
         }
     }
+    public bool isLastSegmentOfPattern()
+    {
+        var patternEndTile = lastPatternStartTileId + patternsCollection.levelDataDict[currentPatternID].levelTileDatas.Count - 1;
+        return GetLastSpawnedSegmentIndex() == patternEndTile;
+    }
     #endregion
 
     #region Score and lives
@@ -443,12 +452,15 @@ public class TrackManager : Singleton<TrackManager>
     }
     public void SetShield(float shieldTime)
     {
+        if(shieldEnumerator != null)
+            StopCoroutine(shieldEnumerator);
         shieldEnumerator = ShieldStart(shieldTime);
         StartCoroutine(shieldEnumerator);
     }
 
     IEnumerator ShieldStart(float shieldTime)
     {
+        Debug.Log("Shield  iEnumerator");
         isProtectedByShield = true;
         float timer = 0;
         shieldTimerImage.gameObject.SetActive(true);
