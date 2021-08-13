@@ -77,7 +77,7 @@ public class TrackManager : Singleton<TrackManager>
     public int lastDebuffSegmentIndex;
 
     [Header("Сегменты")]
-    public GameObject segmentPrefab;
+    public GameObject[] segmentPrefabs;
 
     //clothes objects
     public GameObject[] clothes;
@@ -320,7 +320,7 @@ public class TrackManager : Singleton<TrackManager>
         while (_spawnedSegments < trackSegmentCount)
         {
             Vector3 newPos = new Vector3(horizontalStepDistance / 2, -1f, _spawnedSegments * trackSegmentDistance);
-            GameObject newSegmentGameObject = Instantiate(segmentPrefab, newPos, Quaternion.identity);
+            GameObject newSegmentGameObject = Instantiate(segmentPrefabs[Random.Range(0, segmentPrefabs.Length)], newPos, Quaternion.identity);
 
             TrackSegment newSegment = newSegmentGameObject.GetComponent<TrackSegment>();
             newSegment.trackManager = this;
