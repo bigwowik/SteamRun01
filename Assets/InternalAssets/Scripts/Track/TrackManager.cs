@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using GameObject = UnityEngine.GameObject;
 using UnityEngine.UI;
+using UnityEngine.Events;
 
 #if UNITY_ANALYTICS
 using UnityEngine.Analytics;
@@ -54,7 +55,7 @@ public class TrackManager : Singleton<TrackManager>
 
 
     [Header("Спавн")]
-    public int startSpawnObjectIndex = 1;
+    public int startSpawnObjectIndexDelay = 1;
     [Header("Распределние спавна")]
     public int buffPercent = 20;
     public int debuffPercent = 20;
@@ -95,10 +96,25 @@ public class TrackManager : Singleton<TrackManager>
 
     [Header("Счет и жизни")]
     public int currentLives = 2;
-    public int startLives = 2;
+    public int startLivesLevels = 3;
+    public int startLivesEndless = 5;
+
+    public int StartLives
+    {
+        get
+        {
+            if (GameManager.Instance.CurrentGameState == GameManager.GameState.EndlessRunning)
+                return startLivesEndless;
+            else if (GameManager.Instance.CurrentGameState == GameManager.GameState.LevelsRunning)
+                return startLivesLevels;
+            else
+                return 1;
+        }
+    }
     public float worldDistance { get { return m_TotalWorldDistance; } }
     public float speedRatio { get { return (currentSpeed - minSpeed) / (maxSpeed - minSpeed); } }
 
+    public UnityEvent<int> onPlayerLivesChanged;
 
 
     protected float m_TotalWorldDistance;
@@ -112,17 +128,12 @@ public class TrackManager : Singleton<TrackManager>
 
     private int _spawnedSegments = 0;
 
-    private int lastSpawnedSegmentCount;
-    public int LastSpawnedSegmentCount
+    private int lastSpawnedSegmentCount = 0;
+    
+    public int GetNewSegmentIndexWithIncrement()
     {
-        get
-        {
-            return lastSpawnedSegmentCount++;
-        }
-        private set
-        {
-            lastSpawnedSegmentCount = value;
-        }
+        lastSpawnedSegmentCount++;
+        return lastSpawnedSegmentCount;
     }
     public int GetLastSpawnedSegmentIndex()
     {
@@ -157,11 +168,17 @@ public class TrackManager : Singleton<TrackManager>
     [Header("Уровни")]
     public int currentLevel = 0;
     public LevelsCollection levelsCollection;
-
+    [Header("Паттерны")]
+    public int currentPatternID = 0; //номер конкретного паттерна
+    public bool isCurrentPatternInversed;
+    public int lastPatternStartTileId = 0;  //id тайла с которого начался последний паттери
+    public LevelsCollection patternsCollection;
 
     // other
     IEnumerator shieldEnumerator; //таймер действия щита
-    public bool isProtectedByShield { get; private set; } 
+    public bool isProtectedByShield { get; private set; }
+
+    GameManager.GameState lastGameState;
 
 
     #region Start
@@ -172,6 +189,7 @@ public class TrackManager : Singleton<TrackManager>
         OnStartRun(GameManager.Instance.CurrentGameState, GameManager.GameState.PREGAME); // not super correct
 
         levelsCollection.UpdateLevels();
+        patternsCollection.UpdateLevels();
     }
     private void OnStartRun(GameManager.GameState currentGameState, GameManager.GameState previusGameState)
     {
@@ -204,9 +222,10 @@ public class TrackManager : Singleton<TrackManager>
         scorePanel.SetActive(true);
 
         wasDied = false;
-        LastSpawnedSegmentCount = 0;
+        lastSpawnedSegmentCount = 0;
+        lastPatternStartTileId = startSpawnObjectIndexDelay;
         clothesScore = 0;
-        currentLives = startLives;
+        currentLives = StartLives;
         livesText.text = currentLives + "";
         damageImg.gameObject.SetActive(false);
         failureWindow.SetActive(false);
@@ -230,8 +249,13 @@ public class TrackManager : Singleton<TrackManager>
         isMoving = true;
         wasDied = false;
         damageImg.gameObject.SetActive(false);
-        currentLives = startLives;
+        currentLives = StartLives;
         livesText.text = currentLives + "";
+    }
+    public void ContinueADS()
+    {
+
+        GameManager.Instance.ContinueGameState(lastGameState);
 
     }
 
@@ -262,11 +286,7 @@ public class TrackManager : Singleton<TrackManager>
         
     }
 
-    public void ContinueADS()
-    {
-        GameManager.Instance.SetStartRunningLevels();
-
-    }
+    
 
 
 
@@ -320,17 +340,39 @@ public class TrackManager : Singleton<TrackManager>
         while (_spawnedSegments < trackSegmentCount)
         {
             Vector3 newPos = new Vector3(horizontalStepDistance / 2, -1f, _spawnedSegments * trackSegmentDistance);
-            GameObject newSegmentGameObject = Instantiate(segmentPrefabs[Random.Range(0, segmentPrefabs.Length)], newPos, Quaternion.identity);
+
+            var rndId = Random.Range(0, segmentPrefabs.Length);
+            //var rndId = gameObject.GetInstanceID() % Random.Range(0, segmentPrefabs.Length);
+            GameObject newSegmentGameObject = Instantiate(segmentPrefabs[rndId], newPos, Quaternion.identity);
 
             TrackSegment newSegment = newSegmentGameObject.GetComponent<TrackSegment>();
             newSegment.trackManager = this;
             m_Segments.Add(newSegment);
-            yield return new WaitForSeconds(0.0001f);
+            //yield return new WaitForSeconds(0.0001f);
             _spawnedSegments++;
         }
 
         yield return null;
 
+    }
+
+    public LevelData GetCurrentPattern()
+    {
+        var patternEndTile = lastPatternStartTileId + patternsCollection.levelDataDict[currentPatternID].levelTileDatas.Count - 1;
+
+        if (GetLastSpawnedSegmentIndex() <= patternEndTile) //если еще идет последний паттерн
+        {
+            return patternsCollection.levelDataDict[currentPatternID];
+        }
+        else
+        {
+            lastPatternStartTileId = GetLastSpawnedSegmentIndex();
+            currentPatternID = Random.Range(0, patternsCollection.levelDataDict.Count);
+            Debug.Log("New pattern: " + currentPatternID);
+
+            isCurrentPatternInversed = BigHelper.RandomBool(0.5f);
+            return patternsCollection.levelDataDict[currentPatternID];
+        }
     }
     #endregion
 
@@ -341,6 +383,7 @@ public class TrackManager : Singleton<TrackManager>
         {
             clothesScore += amount;
             UpdateUI();
+
         }
         else
         {
@@ -362,6 +405,7 @@ public class TrackManager : Singleton<TrackManager>
         {
             YouFail();
         }
+        onPlayerLivesChanged.Invoke(-1);
     }
 
     
@@ -371,6 +415,7 @@ public class TrackManager : Singleton<TrackManager>
         isMoving = false;
         failureWindow.SetActive(true);
         wasDied = true;
+        lastGameState = GameManager.Instance.CurrentGameState;
         GameManager.Instance.SetFailureState();
 
     }
@@ -385,12 +430,15 @@ public class TrackManager : Singleton<TrackManager>
 
     public void Healing()
     {
-        //if (currentLives + 1 >= startLives)
-        currentLives = startLives;
-        //else
-        //    currentLives++;
+        if (currentLives + 1 >= StartLives)
+            currentLives = StartLives;
+        else
+            currentLives++;
+
         livesText.text = currentLives + "";
         damageImg.gameObject.SetActive(false);
+
+        onPlayerLivesChanged.Invoke(+1);
 
     }
     public void SetShield(float shieldTime)

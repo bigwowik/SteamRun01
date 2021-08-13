@@ -57,12 +57,47 @@ public class TrackSegment : MonoBehaviour
     {
         if (GameManager.Instance.CurrentGameState == GameManager.GameState.EndlessRunning)
         {
-            SpawnRandomObjects();
+            //SpawnRandomObjects();
+            SpawnPatterns();
         }
         else if (GameManager.Instance.CurrentGameState == GameManager.GameState.LevelsRunning)
         {
             SpawnLevels();
         }
+    }
+
+    void SpawnPatterns()
+    {
+        if (spawnedObject != null)
+            Destroy(spawnedObject);
+
+        //номер сегмента
+        segmentCountIndex = trackManager.GetNewSegmentIndexWithIncrement();
+        countText.text = segmentCountIndex + "";
+        gameObject.name = "platform - " + segmentCountIndex;
+
+        if (trackManager.GetLastSpawnedSegmentIndex() < trackManager.startSpawnObjectIndexDelay)
+            return;
+
+
+
+        Debug.Log(gameObject.name +" was spawned");
+
+        var currentPattern = trackManager.GetCurrentPattern();
+        
+        var currentTiledata = currentPattern.levelTileDatas[segmentCountIndex - trackManager.lastPatternStartTileId ];
+        
+        if (currentTiledata != null)
+        {
+            var xPosition = trackManager.horizontalStepDistance / 2;
+
+            if (trackManager.isCurrentPatternInversed)
+                xPosition = -xPosition;
+
+            SelectAndSpawnClothes(currentTiledata.leftSide, -xPosition);
+            SelectAndSpawnClothes(currentTiledata.rightSide, xPosition);
+        }
+
     }
 
 
@@ -72,10 +107,10 @@ public class TrackSegment : MonoBehaviour
             Destroy(spawnedObject);
 
         //номер сегмента
-        segmentCountIndex = trackManager.LastSpawnedSegmentCount;
+        segmentCountIndex = trackManager.GetNewSegmentIndexWithIncrement();
         countText.text = segmentCountIndex + "";
 
-        if (trackManager.GetLastSpawnedSegmentIndex() > trackManager.startSpawnObjectIndex)
+        if (trackManager.GetLastSpawnedSegmentIndex() > trackManager.startSpawnObjectIndexDelay)
         {
             //поиск положения
             float randomX;
@@ -150,11 +185,11 @@ public class TrackSegment : MonoBehaviour
             Destroy(spawnedObject);
 
 
-        segmentCountIndex = trackManager.LastSpawnedSegmentCount;
+        segmentCountIndex = trackManager.GetNewSegmentIndexWithIncrement();
         countText.text = segmentCountIndex + "";
 
 
-        Debug.Log(gameObject.name + " " + segmentCountIndex);
+        Debug.Log(gameObject.name + " - " + segmentCountIndex);
 
         LevelsCollection levelsCollection = trackManager.levelsCollection;
 

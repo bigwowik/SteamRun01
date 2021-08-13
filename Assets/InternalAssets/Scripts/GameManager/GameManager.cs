@@ -19,7 +19,7 @@ public class GameManager : Singleton<GameManager>
         FAILURE,
         PAUSED
     }
-    public EventGameState OnGameStateChanged; 
+    public EventGameState OnGameStateChanged;
 
     public GameState _currentGameState = GameState.PREGAME;
 
@@ -121,6 +121,16 @@ public class GameManager : Singleton<GameManager>
         {
             gameStateBeforePause = _currentGameState;
             UpdateState(GameState.FAILURE);
+        }
+    }
+
+    public void ContinueGameState(GameState newGameState)
+    {
+        if (newGameState == GameState.LevelsRunning || newGameState == GameState.EndlessRunning)
+        {
+            gameStateBeforePause = _currentGameState;
+            UpdateState(newGameState); 
+
         }
     }
     #endregion

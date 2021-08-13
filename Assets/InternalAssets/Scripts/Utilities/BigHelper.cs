@@ -11,9 +11,9 @@ public static class BigHelper
     /// Return random bool with similar weight (50%)
     /// </summary>
     /// <returns></returns>
-    public static bool RandomBool()
+    public static bool RandomBool(float v)
     {
-        if (Random.Range(0, 1f) >= 0.5f)
+        if (Random.Range(0, 1f) >= v)
         {
             return true;
         }
