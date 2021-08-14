@@ -51,7 +51,7 @@ public class TrackManager : Singleton<TrackManager>
 
     protected const float k_FloatingOriginThreshold = 10000f;
     protected const float k_Acceleration = 0.2f;
-    public float timeToDoubleTap = 0.20f;
+    public float timeToDoubleTap = 0.33f;
 
 
 

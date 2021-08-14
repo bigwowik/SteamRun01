@@ -164,7 +164,9 @@ public class PlayerMovement : MonoBehaviour
 					{
 						if(diff.y < 0)
 						{
-							//Slide();
+
+							TapCloth();
+
 						}
 						else
 						{
@@ -202,7 +204,7 @@ public class PlayerMovement : MonoBehaviour
 			else if(Input.GetTouch(0).phase == TouchPhase.Ended)
 			{
 				m_IsSwiping = false;
-				TapCloth();
+				
 			}
         }
 //#endif
@@ -288,58 +290,53 @@ public class PlayerMovement : MonoBehaviour
 		}
 	}
 	public void TapCloth()
-    {
+	{
 		float timeSinceLastClick = Time.time - lastClickTime;
 		Debug.Log("timeSinceLastClick : " + timeSinceLastClick);
-		if (interactiveCollider != null)
-		{
-			//Debug.Log("TapCloth");
-			
 
-			if (timeSinceLastClick <= TrackManager.Instance.timeToDoubleTap)
+		//Debug.Log("TapCloth");
+
+
+		if (timeSinceLastClick <= TrackManager.Instance.timeToDoubleTap)
+		{
+			if (interactiveCollider != null)
 			{
 				interactiveCollider.GetComponent<ClothInteractive>().DoubleTap();
 				characterCollider.CheckClothes(interactiveCollider.GetComponent<ClothInteractive>());
 				interactiveCollider = null;
 
+
 				StopCoroutine(checkClothReset);
-				//double tap
-				Debug.Log("Double Tap");
-				var particles1 = Instantiate(steamFlow, steamPoint);
-				var particles2 = Instantiate(steamFlow, steamPoint); 
-
-				if (!m_Jumping)
-				{
-					animator.SetTrigger("Steam2");
-				}
-
 			}
-			else
+			//double tap
+			Debug.Log("Double Tap");
+			var particles1 = Instantiate(steamFlow, steamPoint);
+			var particles2 = Instantiate(steamFlow, steamPoint);
+
+			if (!m_Jumping)
 			{
-				interactiveCollider.GetComponent<ClothInteractive>().SingleTap();
-
-
-				checkClothReset = CheckCurrentClothes();
-				StartCoroutine(checkClothReset);
-				//single tap
-				Debug.Log("Single Tap");
-				Instantiate(steamFlow, steamPoint);
-
-				if (!m_Jumping)
-				{
-					animator.SetTrigger("Steam1");
-				}
-
+				animator.SetTrigger("Steam2");
 			}
-
-            
-
-
-			SetCameraInpulse();
-
-
 
 		}
+		else
+		{
+			if (interactiveCollider != null)
+			{
+				interactiveCollider.GetComponent<ClothInteractive>().SingleTap();
+				checkClothReset = CheckCurrentClothes();
+				StartCoroutine(checkClothReset);
+			}
+			//single tap
+			Debug.Log("Single Tap");
+			Instantiate(steamFlow, steamPoint);
+
+			if (!m_Jumping)
+			{
+				animator.SetTrigger("Steam1");
+			}
+		}
+		SetCameraInpulse();
 
 		lastClickTime = Time.time;
 
