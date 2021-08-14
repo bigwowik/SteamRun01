@@ -5665,7 +5665,7 @@ MonoBehaviour:
   debuffObjects:
   - {fileID: 5275897472885197707, guid: dff6b8e0d4440ca48a4f662b8c2ab74b, type: 3}
   currentLives: 1
-  startLivesLevels: 3
+  startLivesLevels: 2
   startLivesEndless: 5
   onPlayerLivesChanged:
     m_PersistentCalls:
