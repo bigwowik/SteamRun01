@@ -90,14 +90,16 @@ public class PlayerMovement : MonoBehaviour
 
 	void OnStartLevel(GameManager.GameState currentGameState, GameManager.GameState previusGameState)
 	{
-		if ((currentGameState == GameManager.GameState.LevelsRunning || currentGameState == GameManager.GameState.EndlessRunning) && previusGameState == GameManager.GameState.PAUSED)
+		if ((currentGameState == GameManager.GameState.LevelsRunning || currentGameState == GameManager.GameState.EndlessRunning) && (previusGameState == GameManager.GameState.PAUSED || previusGameState == GameManager.GameState.FAILURE))
 		{
 			return; //no reset after pause
 		}
 		else if ((currentGameState == GameManager.GameState.LevelsRunning || currentGameState == GameManager.GameState.EndlessRunning) && !trackManager.wasDied)
 		{
 			//reset on start new level
-			transform.position = new Vector3(0, 0, 0);
+			Debug.Log(" 0- 0 -0 on start level.");
+			SetTransformPosition(new Vector3(0, 0, 0));
+			//transform.position = new Vector3(0, 0, 0);
 			ChangeLane(-1);
 		}
 
@@ -236,10 +238,12 @@ public class PlayerMovement : MonoBehaviour
 		{
 
 			characterCollider.transform.localPosition = Vector3.MoveTowards(characterCollider.transform.localPosition, verticalTargetPosition, trackManager.currentSpeed * trackManager.horizontalSpeedRatio * Time.deltaTime);
-			
 
-			transform.position += new Vector3(0, 0, trackManager.currentSpeed * Time.deltaTime);
-			//transform.Translate(0, 0, trackManager.currentSpeed * Time.deltaTime);
+
+			//transform.position += new Vector3(0, 0, trackManager.currentSpeed * Time.deltaTime);
+			SetTransformPosition(transform.position + new Vector3(0, 0, trackManager.currentSpeed * Time.deltaTime));
+
+
 		}
 
         if (trackManager.isProtectedByShield)
@@ -256,6 +260,12 @@ public class PlayerMovement : MonoBehaviour
 		animator.SetFloat("AnimationSpeed", animSpeedMultiplayer);  //0.4f чтобы не сильно увеличивалась скорость
 
 	}
+	//to debug
+	public void SetTransformPosition(Vector3 newPos)
+    {
+		//Debug.Log(gameObject.name + " _player new position - " + newPos);
+		transform.position = newPos;
+    }
 
 
 

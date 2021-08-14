@@ -417,7 +417,8 @@ public class TrackManager : Singleton<TrackManager>
             {
                 trackSegment.transform.position -= currentPos;
             }
-            characterController.transform.position -= currentPos;
+            Debug.Log("Recenter.");
+            characterController.SetTransformPosition(characterController.transform.position- currentPos);
             //cinemachineCamera.gameObject.SetActive(false);
             //cinemachineCamera.position -= currentPos;
             //cinemachineCamera.gameObject.SetActive(true);
@@ -543,6 +544,7 @@ public class TrackManager : Singleton<TrackManager>
         failureWindow.SetActive(true);
         wasDied = true;
         lastGameState = GameManager.Instance.CurrentGameState;
+        StopAllCoroutines();
         GameManager.Instance.SetFailureState();
 
     }
