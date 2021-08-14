@@ -52,6 +52,7 @@ public class RunningMenu : MonoBehaviour
         else if(currentGameState == GameManager.GameState.FAILURE || currentGameState == GameManager.GameState.WIN)
         {
             blurEffect.SetActive(true);
+            runningMenuObject.SetActive(false);
         }
         else if (currentGameState == GameManager.GameState.PAUSED)
         {
