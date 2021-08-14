@@ -41,7 +41,11 @@ public class CharacterCollider : MonoBehaviour
                 clothObj.GetComponentInChildren<MeshRenderer>().material.color = Color.white;
                 clothObj.GetComponentInChildren<MeshRenderer>().material.mainTexture = null;
                 clothObj.GetComponent<Collider>().enabled = false;
-                playerMovement.trackManager.UpScore(1);
+
+                if(clothObj.tapCountRequired == 2)
+                    playerMovement.trackManager.UpScore(2);
+                else
+                    playerMovement.trackManager.UpScore(1);
                 break;
             case ClothState.BadCondition:
                 clothObj.GetComponentInChildren<MeshRenderer>().material.color = Color.black;
