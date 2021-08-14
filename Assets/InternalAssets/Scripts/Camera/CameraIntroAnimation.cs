@@ -6,7 +6,7 @@ public class CameraIntroAnimation : MonoBehaviour
 {
     private void Start()
     {
-        GameManager.Instance.OnGameStateChanged.AddListener(OnStartRun);
+        GameManager.Instance.onGameStateChanged.AddListener(OnStartRun);
 
 
 
@@ -15,7 +15,7 @@ public class CameraIntroAnimation : MonoBehaviour
     private void OnDisable()
     {
         if(GameManager.Instance != null)
-         GameManager.Instance.OnGameStateChanged.RemoveListener(OnStartRun);
+         GameManager.Instance.onGameStateChanged.RemoveListener(OnStartRun);
     }
 
     //запуск анимации в начале игрового режима

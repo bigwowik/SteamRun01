@@ -16,7 +16,7 @@ public class GameStateEnabler : MonoBehaviour
     }
     private void Start()
     {
-        GameManager.Instance.OnGameStateChanged.AddListener(OnStartRun);
+        GameManager.Instance.onGameStateChanged.AddListener(OnStartRun);
 
 
         

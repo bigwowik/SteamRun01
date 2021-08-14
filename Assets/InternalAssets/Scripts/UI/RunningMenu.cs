@@ -16,7 +16,10 @@ public class RunningMenu : MonoBehaviour
 
     void Start()
     {
-        GameManager.Instance.OnGameStateChanged.AddListener(OnGameStart);
+        GameManager.Instance.onGameStateChanged.AddListener(OnGameStart);
+
+
+
         TrackManager.Instance.onPlayerLivesChanged.AddListener(OnLivesChanged);
 
         runningMenuObject.SetActive(false);
@@ -27,7 +30,7 @@ public class RunningMenu : MonoBehaviour
         
         if ((currentGameState == GameManager.GameState.EndlessRunning))
         {
-            OnStartImages();
+            //OnLivesChanged();
             livesParent.gameObject.SetActive(true);
             runningMenuObject.SetActive(true);
             pauseBackground.SetActive(false);

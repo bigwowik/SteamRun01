@@ -185,18 +185,47 @@ public class TrackManager : Singleton<TrackManager>
     #region Start
     private void Start()
     {
-        GameManager.Instance.OnGameStateChanged.AddListener(OnStartRun);
+        GameManager.Instance.onGameModeStart.AddListener(OnGameModeStart);
+
+        GameManager.Instance.onGameStateChanged.AddListener(OnStartRun);
+
+
 
         OnStartRun(GameManager.Instance.CurrentGameState, GameManager.GameState.PREGAME); // not super correct
 
+
+
+
         levelsCollection.UpdateLevels();
         patternsCollection.UpdateLevels();
+    }
+
+    void OnGameModeStart(GameMode gameModeStart) 
+    {
+        if(gameModeStart == GameMode.EndlessMode)
+        {
+            Debug.Log("Start game endless.");
+
+            EndlessStart();
+            CommonStartGame();
+        }
+        else if(gameModeStart == GameMode.LevelsMode)
+        {
+            Debug.Log("Start game levels.");
+
+            LevelsStart();
+            CommonStartGame();
+        }
+        
     }
     private void OnStartRun(GameManager.GameState currentGameState, GameManager.GameState previusGameState)
     {
         if ((currentGameState == GameManager.GameState.EndlessRunning || currentGameState == GameManager.GameState.LevelsRunning) && previusGameState == GameManager.GameState.PAUSED)
         {
             ConinueGameAfterPause();
+
+            onPlayerLivesChanged.Invoke();//обновление состояния жизней
+
             Debug.Log("Coninue Game After Pause");
             //StartGame();
 
@@ -204,23 +233,29 @@ public class TrackManager : Singleton<TrackManager>
 
         else if ((currentGameState == GameManager.GameState.EndlessRunning || currentGameState == GameManager.GameState.LevelsRunning) && !wasDied)
         {
-            Debug.Log("Start game.");
-            StartGame();
+            //Debug.Log("Start game.");
+            //StartGame();
             
         }
         else if ((currentGameState == GameManager.GameState.EndlessRunning || currentGameState == GameManager.GameState.LevelsRunning) && wasDied)
         {
             Debug.Log("Continue game.");
             ConinueGameAfterADS();
+
+
+            onPlayerLivesChanged.Invoke();//обновление состояния жизней
         }
         else
         {
             //
         }
     }
+    
 
-    void StartGame()
+
+    void CommonStartGame()
     {
+        //reset segments
         foreach (TrackSegment seg in m_Segments)
             Destroy(seg.gameObject);
         
@@ -228,30 +263,54 @@ public class TrackManager : Singleton<TrackManager>
         _spawnedSegments = 0;
 
 
+        //включение ui
         scorePanel.SetActive(true);
 
+        //сброс игрока  и счета и счетчика сегментов
         wasDied = false;
+        clothesScore = 0;
+
         lastSpawnedSegmentCount = 0;
         lastPatternStartTileId = startSpawnObjectIndexDelay;
-        clothesScore = 0;
-        currentLives = StartLives;
+        
+        //состояение жизней сброс
         livesText.text = currentLives + "";
         damageImg.gameObject.SetActive(false);
         failureWindow.SetActive(false);
 
-        if (GameManager.Instance.CurrentGameState == GameManager.GameState.LevelsRunning)
-            minSpeed = levelsCollection.startSpeedLevels[GameManager.Instance.LEVELPROGRESS];
-        else
-            minSpeed = minSpeedForEndless;
-        currentSpeed = minSpeed;
 
-
-        currentLevelInt.text = GameManager.Instance.LEVELPROGRESS + "";
+        //можно двигаться
         isMoving = true;
+
         StartCoroutine(SpawnNewSegment());
 
 
+        onPlayerLivesChanged.Invoke();//обновление состояния жизней
+
         Debug.Log("new level progress: " + GameManager.Instance.LEVELPROGRESS);
+    }
+
+    void EndlessStart()
+    {
+        //установка жизней
+        currentLives = startLivesEndless;
+        //установка скорости
+        minSpeed = minSpeedForEndless;
+        currentSpeed = minSpeed;
+
+
+
+    }
+    void LevelsStart()
+    {
+        //установка жизней
+        currentLives = startLivesLevels;
+
+        //установка скорости
+        minSpeed = levelsCollection.startSpeedLevels[GameManager.Instance.LEVELPROGRESS];
+        currentSpeed = minSpeed;
+        //установка номера уровня
+        currentLevelInt.text = GameManager.Instance.LEVELPROGRESS + "";
     }
 
     void ConinueGameAfterADS()
@@ -268,18 +327,18 @@ public class TrackManager : Singleton<TrackManager>
     void ConinueGameAfterPause()
     {
         isMoving = true;
+
+        onPlayerLivesChanged.Invoke();//обновление состояния жизней
     }
     public void ContinueADS()
     {
 
         GameManager.Instance.ContinueGameState(lastGameState);
 
+        onPlayerLivesChanged.Invoke();//обновление состояния жизней
+
     }
 
-    private void PauseMenu()
-    {
-        isMoving = false;
-    }
     public void EndLevel()
     {
         isMoving = false;
@@ -300,10 +359,17 @@ public class TrackManager : Singleton<TrackManager>
         //isMoving = true;
         wasDied = false;
         GameManager.Instance.SetStartRunningLevels();
-        
+
+        onPlayerLivesChanged.Invoke();//обновление состояния жизней
+
+    }
+    public void Restart()
+    {
+        GameManager.Instance.RestartLevel();
+
     }
 
-    
+
 
 
 
@@ -441,11 +507,6 @@ public class TrackManager : Singleton<TrackManager>
         GameManager.Instance.SetFailureState();
 
     }
-
-    void Restart()
-    {
-        GameManager.Instance.RestartLevel();
-    }
     #endregion
 
     #region Buffs and debuffs
@@ -514,6 +575,8 @@ public class TrackManager : Singleton<TrackManager>
         else
             currentSpeed = maxSpeed;
     }
+
+    
 
     #endregion
 

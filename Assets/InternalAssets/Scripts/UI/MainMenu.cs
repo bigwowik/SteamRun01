@@ -22,10 +22,15 @@ public class MainMenu : MonoBehaviour
         switch (currentPlayMode)
         {
             case 0:
-                GameManager.Instance.SetStartRunningEndless();
+                //TrackManager.Instance.SetStartLivesEndless();
+                //GameManager.Instance.SetStartRunningEndless();
+                GameManager.Instance.StartRunningEndless();
+
                 break;
             case 1:
-                GameManager.Instance.SetStartRunningLevels();
+                //TrackManager.Instance.SetStartLivesLevels();
+                //GameManager.Instance.SetStartRunningLevels();
+                GameManager.Instance.StartRunningLevels();
                 break;
             default:
                 Debug.Log("No playmode." );

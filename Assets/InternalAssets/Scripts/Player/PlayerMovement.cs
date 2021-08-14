@@ -52,7 +52,11 @@ public class PlayerMovement : MonoBehaviour
 
 	private Animator animator;
 
-    private void Awake()
+
+
+	float animationSpeedStartValue = 5f; //для какой велечины делались анимации
+
+	private void Awake()
     {
 		animator = GetComponentInChildren<Animator>();
 
@@ -60,7 +64,7 @@ public class PlayerMovement : MonoBehaviour
 	}
     private void Start()
     {
-		GameManager.Instance.OnGameStateChanged.AddListener(OnStartLevel);
+		GameManager.Instance.onGameStateChanged.AddListener(OnStartLevel);
 
     }
     // Update is called once per frame
@@ -247,6 +251,9 @@ public class PlayerMovement : MonoBehaviour
         {
 			shield.SetActive(false);
 		}
+
+
+		animator.SetFloat("AnimationSpeed", trackManager.currentSpeed / animationSpeedStartValue);
 
 	}
 

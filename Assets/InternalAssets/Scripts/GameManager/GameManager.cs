@@ -6,9 +6,12 @@ using UnityEngine.Events;
 
 
 
+
 public class GameManager : Singleton<GameManager>
 {
-
+    #region New Enums
+   
+    
 
     public enum GameState
     {
@@ -19,7 +22,10 @@ public class GameManager : Singleton<GameManager>
         FAILURE,
         PAUSED
     }
-    public EventGameState OnGameStateChanged;
+    #endregion
+    public EventGameState onGameStateChanged;
+    public EventFadeModeStart onFadeModeStart;
+    public EventOnGameModeStart onGameModeStart;
 
     public GameState _currentGameState = GameState.PREGAME;
 
@@ -72,7 +78,7 @@ public class GameManager : Singleton<GameManager>
                 break;
         }
 
-        OnGameStateChanged.Invoke(_currentGameState, previousGameState);
+        onGameStateChanged.Invoke(_currentGameState, previousGameState);
         Debug.Log(name + " : game mode was changed. Current state : " + _currentGameState + ". Previous state : " + previousGameState);
     }
 
@@ -90,14 +96,25 @@ public class GameManager : Singleton<GameManager>
         }
     }
 
+    //endless mode start
     public void SetStartRunningEndless()
     {
         if (_currentGameState != GameState.EndlessRunning)
         {
+            
             gameStateBeforePause = _currentGameState;
             UpdateState(GameState.EndlessRunning);
         }
     }
+    public void StartRunningEndless()
+    {
+        
+        
+        onGameModeStart.Invoke(GameMode.EndlessMode);
+        SetStartRunningEndless();
+    }
+
+    //levels mode start
     public void SetStartRunningLevels()
     {
         if (_currentGameState != GameState.LevelsRunning)
@@ -106,6 +123,15 @@ public class GameManager : Singleton<GameManager>
             UpdateState(GameState.LevelsRunning);
         }
     }
+    public void StartRunningLevels()
+    {
+        
+        
+        onGameModeStart.Invoke(GameMode.LevelsMode);
+        SetStartRunningLevels();
+    }
+
+
 
     public void SetWinState()
     {
@@ -137,6 +163,14 @@ public class GameManager : Singleton<GameManager>
 
     public void RestartLevel() 
     {
+        float timeToRestart = 1f;
+        onFadeModeStart.Invoke(FadeMode.FadeOut);
+        Invoke("RestartLevelAfterTime", timeToRestart);
+        
+    }
+
+    void RestartLevelAfterTime()
+    {
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
@@ -150,4 +184,18 @@ public class GameManager : Singleton<GameManager>
 
 }
 
+public enum FadeMode
+{
+    FadeIn,
+    FadeOut
+}
+public enum GameMode
+{
+    EndlessMode,
+    LevelsMode
+}
+
 [System.Serializable] public class EventGameState : UnityEvent<GameManager.GameState, GameManager.GameState> { }
+[System.Serializable] public class EventFadeModeStart : UnityEvent<FadeMode> { }
+
+[System.Serializable] public class EventOnGameModeStart : UnityEvent<GameMode> { }
