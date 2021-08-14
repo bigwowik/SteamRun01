@@ -2097,7 +2097,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 502853941}
-  m_LocalRotation: {x: 0.043886304, y: 0.8843145, z: -0.08492162, w: 0.45700136}
+  m_LocalRotation: {x: 0.043886308, y: 0.8843145, z: -0.08492161, w: 0.45700136}
   m_LocalPosition: {x: -5.26, y: 1.25, z: 4.63}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
@@ -5003,7 +5003,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1428009159}
-  m_LocalRotation: {x: 0.043886304, y: 0.8843145, z: -0.08492162, w: 0.45700136}
+  m_LocalRotation: {x: 0.043886308, y: 0.8843145, z: -0.08492161, w: 0.45700136}
   m_LocalPosition: {x: -5.26, y: 1.25, z: 4.63}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
@@ -5407,10 +5407,10 @@ MonoBehaviour:
   cloth1Percent: 15
   cloth2Percent: 10
   emptyClothPercent: 10
-  buffInterval: 15
-  debuffInterval: 10
-  trackSegmentDistance: 5
-  trackSegmentCount: 40
+  buffInterval: 30
+  debuffInterval: 20
+  trackSegmentDistance: 10
+  trackSegmentCount: 20
   trackSegmentTeleportDistance: 20
   lastBuffSegmentIndex: 0
   lastDebuffSegmentIndex: 0
