@@ -252,8 +252,8 @@ public class PlayerMovement : MonoBehaviour
 			shield.SetActive(false);
 		}
 
-
-		animator.SetFloat("AnimationSpeed", trackManager.currentSpeed / animationSpeedStartValue);
+		var animSpeedMultiplayer = 0.05f * trackManager.currentSpeed + 0.75f;
+		animator.SetFloat("AnimationSpeed", animSpeedMultiplayer);  //0.4f чтобы не сильно увеличивалась скорость
 
 	}
 

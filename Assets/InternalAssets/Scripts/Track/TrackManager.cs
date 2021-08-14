@@ -100,6 +100,13 @@ public class TrackManager : Singleton<TrackManager>
     public int startLivesLevels = 3;
     public int startLivesEndless = 5;
 
+
+    IEnumerator damageEnumerator;
+    float damageEffectTime = 1.5f;
+
+    IEnumerator successEnumerator;
+    float successEffectTime = 0.5f;
+
     public int StartLives
     {
         get
@@ -151,8 +158,9 @@ public class TrackManager : Singleton<TrackManager>
     public Text clothesScoreTextFail;
     public Text speedText;
     public Text livesText;
-    public Image damageImg;
+    public GameObject damageImg;
     public GameObject failureWindow;
+    public GameObject successImage;
     public Text currentLevelInt;
     public Image shieldTimerImage;
 
@@ -180,6 +188,8 @@ public class TrackManager : Singleton<TrackManager>
     public bool isProtectedByShield { get; private set; }
 
     GameManager.GameState lastGameState;
+
+
 
 
     #region Start
@@ -230,13 +240,21 @@ public class TrackManager : Singleton<TrackManager>
             //StartGame();
 
         }
-
-        else if ((currentGameState == GameManager.GameState.EndlessRunning || currentGameState == GameManager.GameState.LevelsRunning) && !wasDied)
+        else if ((currentGameState == GameManager.GameState.LevelsRunning) && !wasDied)
         {
+            //Debug.Log("Start game.");
+
+            LevelsStart();
+            CommonStartGame();
+
+        }
+
+        //else if ((currentGameState == GameManager.GameState.EndlessRunning || currentGameState == GameManager.GameState.LevelsRunning) && !wasDied)
+        //{
             //Debug.Log("Start game.");
             //StartGame();
             
-        }
+        //}
         else if ((currentGameState == GameManager.GameState.EndlessRunning || currentGameState == GameManager.GameState.LevelsRunning) && wasDied)
         {
             Debug.Log("Continue game.");
@@ -277,6 +295,7 @@ public class TrackManager : Singleton<TrackManager>
         livesText.text = currentLives + "";
         damageImg.gameObject.SetActive(false);
         failureWindow.SetActive(false);
+        successImage.SetActive(false);
 
 
         //можно двигаться
@@ -472,6 +491,11 @@ public class TrackManager : Singleton<TrackManager>
             clothesScore += amount;
             UpdateUI();
 
+            if (successEnumerator != null)
+                StopCoroutine(successEnumerator);
+            successEnumerator = OnOffEffectTimer(successEffectTime, successImage);
+            StartCoroutine(successEnumerator);
+
         }
         else
         {
@@ -488,12 +512,27 @@ public class TrackManager : Singleton<TrackManager>
         currentLives--;
         livesText.text = currentLives + "";
         if (currentLives != 0)
-            damageImg.gameObject.SetActive(true);
+        {
+
+            if (damageEnumerator != null)
+                StopCoroutine(damageEnumerator);
+            damageEnumerator = OnOffEffectTimer(damageEffectTime, damageImg);
+            StartCoroutine(damageEnumerator);
+        }
         else
         {
             YouFail();
         }
         onPlayerLivesChanged.Invoke();
+    }
+
+    IEnumerator OnOffEffectTimer(float time, GameObject objectToOnOff)
+    {
+        //Debug.Log("Damage effect timer");
+        objectToOnOff.SetActive(true);
+        yield return new WaitForSeconds(time);
+        objectToOnOff.SetActive(false);
+        yield return null;
     }
 
     

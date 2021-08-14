@@ -13,6 +13,7 @@ public class RunningMenu : MonoBehaviour
 
     public GameObject runningMenuObject;
     public GameObject pauseBackground;
+    public GameObject blurEffect;
 
     void Start()
     {
@@ -24,6 +25,8 @@ public class RunningMenu : MonoBehaviour
 
         runningMenuObject.SetActive(false);
 
+        blurEffect.SetActive(false);
+
     }
     private void OnGameStart(GameManager.GameState currentGameState, GameManager.GameState previusGameState)
     {
@@ -34,16 +37,26 @@ public class RunningMenu : MonoBehaviour
             livesParent.gameObject.SetActive(true);
             runningMenuObject.SetActive(true);
             pauseBackground.SetActive(false);
+
+            blurEffect.SetActive(false);
         }
         else if(currentGameState == GameManager.GameState.LevelsRunning)
         {
             livesParent.gameObject.SetActive(false);
             runningMenuObject.SetActive(true);
             pauseBackground.SetActive(false);
+
+
+            blurEffect.SetActive(false);
+        }
+        else if(currentGameState == GameManager.GameState.FAILURE || currentGameState == GameManager.GameState.WIN)
+        {
+            blurEffect.SetActive(true);
         }
         else if (currentGameState == GameManager.GameState.PAUSED)
         {
             pauseBackground.SetActive(true);
+            blurEffect.SetActive(true);
 
         }
         

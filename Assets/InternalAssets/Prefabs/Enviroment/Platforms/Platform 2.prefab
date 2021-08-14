@@ -60,7 +60,7 @@ MonoBehaviour:
   objectRoot: {fileID: 0}
   collectibleTransform: {fileID: 0}
   obstaclePositions: []
-  spawnedObject: {fileID: 0}
+  spawnedObjects: []
   segmentCountIndex: 0
   countText: {fileID: 586125042810913320}
 --- !u!1 &5740643960550182986
@@ -322,6 +322,10 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: 6ed84f552a234c342884ffe693e8d9a9, type: 3}
       propertyPath: m_RootOrder
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 6ed84f552a234c342884ffe693e8d9a9, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 100
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 6ed84f552a234c342884ffe693e8d9a9, type: 3}
       propertyPath: m_LocalPosition.x
