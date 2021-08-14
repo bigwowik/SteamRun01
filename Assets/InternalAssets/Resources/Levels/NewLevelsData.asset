@@ -20,7 +20,7 @@ MonoBehaviour:
   - {fileID: 4900000, guid: 2fdbaecb09db7f842a68f12673724e69, type: 3}
   - {fileID: 4900000, guid: 7bac18cd8a36b8e4ab73e587518fd289, type: 3}
   startSpeedLevels:
-  - 5
+  - 10
   - 5
   - 5
   - 5

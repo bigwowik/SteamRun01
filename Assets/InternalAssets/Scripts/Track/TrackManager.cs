@@ -515,10 +515,19 @@ public class TrackManager : Singleton<TrackManager>
         if (currentLives != 0)
         {
 
-            if (damageEnumerator != null)
-                StopCoroutine(damageEnumerator);
-            damageEnumerator = OnOffEffectTimer(damageEffectTime, damageImg);
-            StartCoroutine(damageEnumerator);
+            if(GameManager.Instance.CurrentGameState == GameManager.GameState.LevelsRunning)
+            {
+                damageImg.SetActive(true);
+            }
+            else if(GameManager.Instance.CurrentGameState == GameManager.GameState.EndlessRunning)
+            {
+                if (damageEnumerator != null)
+                    StopCoroutine(damageEnumerator);
+                damageEnumerator = OnOffEffectTimer(damageEffectTime, damageImg);
+                StartCoroutine(damageEnumerator);
+            }
+
+            
         }
         else
         {
@@ -560,6 +569,15 @@ public class TrackManager : Singleton<TrackManager>
             currentLives++;
 
         livesText.text = currentLives + "";
+
+        //визуальный эффект
+        if (successEnumerator != null)
+            StopCoroutine(successEnumerator);
+        successEnumerator = OnOffEffectTimer(successEffectTime, successImage);
+        StartCoroutine(successEnumerator);
+
+
+
         damageImg.gameObject.SetActive(false);
 
         onPlayerLivesChanged.Invoke();
